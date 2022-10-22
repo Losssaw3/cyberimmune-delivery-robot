@@ -1,0 +1,77 @@
+@startuml
+!pragma teoz true
+'autonumber
+
+actor "Warehouse manager" as WH
+participant "Fleet management\n service" as FMS
+participant "Communication\n service" as CS
+participant "Central control\n unit" as CCU
+participant "Motion control\n unit" as MCU
+participant "Positioning\n unit" as PU
+participant "Sensors\n unit" as SU
+participant "Human-machine\n interface unit" as HMI
+actor "User" as User
+
+User    -> WH:      new order
+WH     -> FMS:     new delivery request
+FMS    --> User:    PIN code
+FMS     -> CS:      delivery details
+&CS     -> CCU:     delivery details
+
+activate CCU
+
+loop go to user until destination reached
+
+MCU     -> PU:      odometry
+PU      <--> CCU:   current position
+CCU     -> MCU:     target driving\n speed & direction
+
+end
+
+
+CCU     -> MCU:     stop motors
+
+SU      -> CCU:     human detected
+activate CCU #DDDDDD
+
+
+loop until code valid or attempts count ended
+User    -> HMI:     enter PIN
+HMI     -> CCU:     access PIN
+CCU     -> CCU:     check PIN
+end
+
+alt Valid PIN supplied
+
+CCU     -> SU:      open locker
+activate SU
+SU      -> SU:      locker open\nfor 5sec
+SU     --> CCU:     locker closed
+deactivate SU
+
+else Maximum invalid attempts count reached
+
+CCU    --> CS:      user failed to enter PIN
+&CS    --> FMS
+
+deactivate CCU
+end
+
+loop go to warehouse until destination reached
+MCU     -> PU:      odometry
+PU      <--> CCU:   current position
+CCU     -> MCU:     target driving\n speed & direction
+end
+
+CCU     -> MCU:     stop motors
+
+CCU     --> CS:     delivery ended
+
+deactivate CCU
+
+&CS     --> FMS:    delivery ended
+&FMS    --> WH:     delivery ended
+
+
+
+@enduml
