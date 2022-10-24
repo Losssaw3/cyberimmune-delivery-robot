@@ -1,0 +1,49 @@
+@startuml
+
+actor User as U
+
+rectangle Warehouse {
+    actor "Warehouse\n  manager" as W
+    usecase "Fleet management" as FMS
+
+    W -> FMS : (HTTP) delivery details
+}
+
+rectangle Robot {
+    usecase "Communication" as CS
+    usecase "Motion control" as MCU
+    usecase "Positioning" as PU
+    usecase "Sensors" as SU
+    usecase "HMI" as HMI
+    usecase "Central control" as CCU
+
+    rectangle {
+        usecase "Message Bus" as MB
+        usecase "Monitor" as M
+
+        M <-> MB: validation
+    }
+
+    FMS --> CS: (HTTP)\ndelivery details,\nPIN code,\nstatus messages
+
+    CS <---> MB
+
+    MB <-down-> CCU: full robot control,\nbusiness logic
+    MCU <---> MB: target motion\ndirection, speed\nand limitations
+    PU <---> MB: current position
+    SU <---> MB: human detection,\nlocker control
+    HMI <-> MB : input of PIN code
+
+    U -> HMI: (HTTP) PIN code
+}
+
+legend right
+    | Цвет | Тип |
+    |<#lawngreen> | Доверенный компонент |
+    |<#orangered>| Недоверенный компонент |
+end legend
+
+
+
+
+@enduml
