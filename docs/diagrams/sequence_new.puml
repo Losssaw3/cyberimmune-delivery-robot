@@ -4,18 +4,26 @@
 
 actor "Warehouse manager" as WH
 participant "Fleet management\n service" as FMS
+participant "Authentication\n service" as AS
 participant "Communication\n service" as CS
 participant "Central control\n unit" as CCU
 participant "Motion control\n unit" as MCU
 participant "Positioning\n unit" as PU
+participant "Odometer Positioning\nDriver" as OPD
+participant "Global Positioning\nDriver" as GPD
 participant "Sensors\n unit" as SU
 participant "Human-machine\n interface unit" as HMI
 actor "User" as User
 
 User    -> WH:      new order
+activate FMS
 WH      -> FMS:     new delivery request
-FMS    --> User:    PIN code
-FMS     -> CS:      delivery details
+activate AS
+FMS     -> AS:      create PIN
+AS      -> User:    plain PIN
+AS     --> FMS:     encrypted PIN
+deactivate AS
+FMS     -> CS:      new task (address+sig + encrypted pin)
 &CS     -> CCU
 
 activate CCU
@@ -23,11 +31,20 @@ activate CCU
 CCU    --> CS:      delivery started
 &CS    --> FMS:
 
+CCU     -> CCU:     decrypt PIN
+CCU     -> CCU:     validate address signature
+opt PIN decryption failed or adderess signature invalid
+CCU    --> CS:      unable to start task
+&CS    --> FMS
+end opt
+
 loop go to user until destination reached
 
-MCU     -> PU:      odometry
-PU      <--> CCU:   current position
-CCU     -> MCU:     target driving\n speed & direction
+MCU     -> OPD:      odometry
+OPD     -> PU:       position
+GPD     -> PU:       position
+PU      <-> CCU:     current position
+CCU     -> MCU:      target driving\n speed & direction
 
 end
 
@@ -61,9 +78,11 @@ deactivate CCU
 end
 
 loop go to warehouse until destination reached
-MCU     -> PU:      odometry
-PU      <--> CCU:   current position
-CCU     -> MCU:     target driving\n speed & direction
+MCU     -> OPD:      odometry
+OPD     -> PU:       position
+GPD     -> PU:       position
+PU      <-> CCU:     current position
+CCU     -> MCU:      target driving\n speed & direction
 end
 
 CCU     -> MCU:     stop motors
@@ -75,6 +94,7 @@ deactivate CCU
 &CS     --> FMS:    delivery ended
 &FMS    --> WH:     delivery ended
 
+deactivate FMS
 
 
 @enduml
