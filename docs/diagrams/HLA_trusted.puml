@@ -2,48 +2,62 @@
 
 actor User as U
 
+usecase "VPN client\n(server side)" as VPNC0 #lawngreen
+usecase "VPN client\n(robot side)" as VPNC1 #lawngreen
+usecase "VPN server" as VPNS #lawngreen
+
 rectangle Warehouse {
     actor "Warehouse\n  manager" as W
-    usecase "Fleet management" as FMS
+    usecase "Fleet management" as FMS #orangered
+    usecase "Authentication service" as AS #lawngreen
 
     W -> FMS : (HTTP) delivery details
+    FMS <-up-> AS: encrypted PIN
+    FMS --> VPNC0
 }
 
+VPNC0 --> VPNC1
+VPNC0 -> VPNS
+VPNC1 -> VPNS
+
 rectangle Robot {
-    usecase "Communication" as CS
-    usecase "Motion control" as MCU
-    usecase "Positioning" as PU
-    usecase "Sensors" as SU
-    usecase "HMI" as HMI
-    usecase "Central control" as CCU
+    usecase "Communication" as CS #orangered
+    usecase "Motion control" as MCU #orangered
+    usecase "GPD" as GPD #orangered
+    usecase "OPD" as OPD #orangered
+    usecase "Positioning" as PU #lawngreen
+    usecase "Sensors" as SU #lawngreen
+    usecase "HMI" as HMI #orangered
+    usecase "Central control" as CCU #lawngreen
 
     rectangle {
-        usecase "Message Bus" as MB
-        usecase "Monitor" as M
+        usecase "Message Bus" as MB #lawngreen
+        usecase "Monitor" as M #lawngreen
 
         M <-> MB: validation
     }
 
-    FMS --> CS: (HTTP)\ndelivery details,\nPIN code,\nstatus messages
+    VPNC1 --> CS
 
     CS <---> MB
 
     MB <-down-> CCU: full robot control,\nbusiness logic
     MCU <---> MB: target motion\ndirection, speed\nand limitations
-    PU <---> MB: current position
-    SU <---> MB: human detection,\nlocker control
+    PU <-up-> MB: current position
+    SU <-up-> MB: human detection,\nlocker control
     HMI <-> MB : input of PIN code
+
+    OPD <--> MB: odometry raw data
+    GPD <-down-> MB: GPS raw data
 
     U -> HMI: (HTTP) PIN code
 }
+
 
 legend right
     | Цвет | Тип |
     |<#lawngreen> | Доверенный компонент |
     |<#orangered>| Недоверенный компонент |
 end legend
-
-
-
 
 @enduml
