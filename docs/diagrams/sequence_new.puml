@@ -45,6 +45,7 @@ OPD     -> PU:       position
 GPD     -> PU:       position
 PU      <-> CCU:     current position
 CCU     -> MCU:      target driving\n speed & direction
+MCU     -> MCU:       apply restrictions
 
 end
 

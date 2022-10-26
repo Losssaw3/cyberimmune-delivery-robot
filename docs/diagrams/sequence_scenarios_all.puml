@@ -1,0 +1,150 @@
+@startuml
+!pragma teoz true
+'autonumber
+
+actor "Warehouse manager" as WH
+actor "Attacker" as Att #red
+participant "Authentication\n service" as AS
+participant "Fleet management\n service" as FMS
+participant "Communication\n service" as CS
+participant "Central control\n unit" as CCU
+participant "Motion control\n unit" as MCU
+participant "Positioning\n unit" as PU
+participant "Odometer Positioning\nDriver" as OPD
+participant "Global Positioning\nDriver" as GPD
+participant "Sensors\n unit" as SU
+participant "Human-machine\n interface unit" as HMI
+actor "User" as User
+
+loop#red DDOS
+Att     -[#red]> FMS
+end loop
+
+activate SU
+note over SU #red: open without request
+SU -[#red]> SU: open
+deactivate SU
+
+User    -> WH:      new order
+activate FMS
+WH      -> FMS:     new delivery request
+activate AS
+FMS     -> AS:      create PIN
+AS      -[#red]> Att:     exfiltrated plain PIN\n for old architecture or\nencrypted PIN for new
+AS      -> User:    plain PIN
+AS     --> FMS:     encrypted PIN
+deactivate AS
+
+note over Att #red: PIN encryption broken \n => got plain PIN
+note over FMS #red: PIN changed to \nknown by attacker
+note over FMS #red: Address changed
+FMS      -[#red]> Att:     exfiltrated PIN
+
+
+note over FMS, CS #red: MITM: task read/change/prevent sending
+FMS     -[#red]> CS:      new task (address+sig + encrypted pin)
+note over CS #red: details changed
+CS      -[#red]> Att:     PIN
+CS     -> CCU
+
+activate CCU
+
+CCU    --> CS:      delivery started
+&CS    --> FMS:
+
+note over CCU #red: decrypt with attacker's key\n as he changed cyphertext earlier
+CCU     -[#red]> CCU:     decrypt PIN
+
+note over CCU #red: do not do validation,\n or change the certificate to attacker's
+CCU     -[#red]> CCU:     validate address signature
+
+opt PIN decryption failed or adderess signature invalid
+note over FMS, CS #red: do not notify of errors
+CCU    --[#red]> CS:      unable to start task
+&CS    --[#red]> FMS
+end opt
+
+loop go to user until destination reached
+
+MCU     -[#red]> OPD:      invalid odometry
+OPD     -[#red]> PU:       invalid position
+GPD     -[#red]> PU:       invalid position
+note over PU #red: ignore drivers' data
+PU      <-[#red]> CCU:     invalid current position
+note over CCU #red: targeting not\n the desired position
+CCU     -[#red]> MCU:      invalid target driving\n speed & direction
+note over MCU #red: ignore sent request
+note over MCU #red: do not apply restrictions
+MCU     -[#red]> MCU:       apply restrictions
+
+note over CCU #red: try open locker not in destination
+CCU     -[#red]> SU:      open locker
+end
+
+
+CCU     -> MCU:     stop motors
+note over MCU #red: do not stop
+
+SU      -[#red]> CCU:     human detected
+activate CCU #DDDDDD
+
+
+loop until code valid or attempts count ended
+loop#red Enter invalid PIN multiple times
+User    -[#red]> HMI:     enter PIN
+end
+
+loop#red Bruteforce by HMI service
+HMI     -[#red]> CCU:     access PIN
+end
+
+HMI     -> CCU:     access PIN
+
+note over CCU #red: do not validate PIN
+CCU     -[#red]> CCU:     check PIN
+end
+
+alt Valid PIN supplied
+
+CCU     -> SU:      open locker
+activate SU
+note over SU #red: do not open
+SU      -[#red]> SU:      locker open\nfor 5sec
+SU     --> CCU:     locker closed
+deactivate SU
+
+else Maximum invalid attempts count reached
+
+note over CCU #red: open when PIN not supplied
+CCU  -[#red]> SU: open locker
+
+CCU    --> CS:      user failed to enter PIN
+&CS    --> FMS
+
+deactivate CCU
+end
+
+loop go to warehouse until destination reached
+MCU     -> OPD:      odometry
+OPD     -> PU:       position
+GPD     -> PU:       position
+PU      <-> CCU:     current position
+CCU     -> MCU:      target driving\n speed & direction
+end
+
+CCU     -> MCU:     stop motors
+
+
+note over FMS, CS #red: do not notify of ending
+
+CCU     --[#red]> CS:     delivery ended
+
+deactivate CCU
+
+&CS     --[#red]> FMS:    delivery ended
+FMS    --> WH:     delivery ended
+
+deactivate FMS
+
+
+@enduml
