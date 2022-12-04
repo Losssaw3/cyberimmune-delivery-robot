@@ -3,15 +3,15 @@ plugins {
     application
 }
 
-//group = "ru.bardinpetr.delivery.backend.authentication"
-version = "v1.0"
+group = "ru.bardinpetr.delivery.robot"
+version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
 }
 
 application {
-    mainClass.set("${group}.Main")
+    mainClass.set("ru.bardinpetr.delivery.robot.hmi.Main")
 }
 
 dependencies {
