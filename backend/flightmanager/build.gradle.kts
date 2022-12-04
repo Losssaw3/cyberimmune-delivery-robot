@@ -4,7 +4,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.15.RELEASE"
 }
 
-//group = "${group}.flightmanager"
+group = "ru.bardinpetr.delivery.backend.flightmanager"
 
 repositories {
     mavenCentral()
@@ -17,5 +17,5 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    implementation(project(":messages"))
+    implementation(project(":libs:messages"))
 }

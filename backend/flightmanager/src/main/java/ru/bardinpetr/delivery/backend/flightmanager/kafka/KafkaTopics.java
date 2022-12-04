@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.bardinpetr.delivery.messages.MessageRequest;
 import ru.bardinpetr.delivery.messages.fms.Action1Request;

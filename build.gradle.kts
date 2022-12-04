@@ -1,0 +1,1 @@
+group = "ru.bardinpetr.delivery"

@@ -2,9 +2,9 @@ package ru.bardinpetr.delivery.backend.authentication;
 
 
 import ru.bardinpetr.delivery.backend.authentication.services.PinGeneratorService;
-import ru.bardinpetr.delivery.backend.authentication.services.crypto.CryptoService;
-import ru.bardinpetr.delivery.backend.authentication.services.crypto.KeyGenService;
 import ru.bardinpetr.delivery.backend.authentication.services.messaging.SenderService;
+import ru.bardinpetr.delivery.libs.crypto.CryptoService;
+import ru.bardinpetr.delivery.libs.crypto.KeyGenService;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ public class Main {
         var crypt = new CryptoService();
         var snd = new SenderService();
 
-        var ms = new MainService(key, ping, crypt, snd);
+        var ms = new AuthenticationService(key, ping, crypt, snd);
 
         var enc = ms.createPin("asdf");
         System.out.println(enc);
