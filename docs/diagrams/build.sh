@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
-plantuml *.puml
-mv *.png res/
+rm res/*
+shopt -s globstar
+plantuml ./**/*.puml
+mv ./**/*.png res/

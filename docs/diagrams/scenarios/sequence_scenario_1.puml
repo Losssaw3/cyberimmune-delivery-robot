@@ -1,0 +1,108 @@
+@startuml
+!pragma teoz true
+'autonumber
+
+actor "Warehouse manager" as WH
+participant "Fleet management\n service" as FMS
+participant "Authentication\n service" as AS
+participant "Communication\n service" as CS
+participant "Central control\n unit" as CCU
+participant "Motion control\n unit" as MCU
+participant "Positioning\n unit" as PU
+participant "Odometer Positioning\nDriver" as OPD
+participant "Global Positioning\nDriver" as GPD
+participant "Sensors\n unit" as SU
+participant "Human-machine\n interface unit" as HMI
+actor "User" as User
+actor "Attacker" as Att #red
+
+User    -> WH:      new order
+activate FMS
+WH      -> FMS:     new delivery request
+activate AS
+FMS     -> AS:      create PIN
+AS      -> User:    plain PIN
+note over AS #red: PIN exfiltrated or changed to known by attacker
+AS      -> AS:      encrypt pin
+AS     --[#red]> FMS:     encrypted PIN\nknown by attacker
+&AS     -[#red]> Att
+deactivate AS
+
+note over FMS #red: address changed to attacker's
+
+FMS     -[#red]> CS:      task with different address and/or known PIN
+&CS     -[#red]> CCU
+
+activate CCU
+
+CCU    --> CS:      delivery started
+&CS    --> FMS:
+
+CCU     -> CCU:     decrypt PIN
+CCU     -> CCU:     validate address signature
+opt PIN decryption failed or adderess signature invalid
+CCU    --> CS:      unable to start task
+&CS    --> FMS
+end opt
+
+loop go to user until destination reached
+
+MCU     -> OPD:      odometry
+OPD     -> PU:       position
+GPD     -> PU:       position
+PU      <-> CCU:     current position
+CCU     -[#red]> MCU:      direct robot to invalid target
+MCU     -> MCU:       apply restrictions
+
+end
+
+
+CCU     -> MCU:     stop motors
+
+SU      -> CCU:     human detected
+activate CCU #DDDDDD
+
+
+loop until code valid or attempts count ended
+User    -> HMI:     enter PIN
+HMI     -> CCU:     access PIN
+CCU     -> CCU:     check PIN
+end
+
+alt Valid PIN supplied
+
+CCU     -> SU:      open locker
+activate SU
+SU      -> SU:      locker open\nfor 5sec
+SU     --> CCU:     locker closed
+deactivate SU
+
+else Maximum invalid attempts count reached
+
+CCU    --> CS:      user failed to enter PIN
+&CS    --> FMS
+
+deactivate CCU
+end
+
+loop go to warehouse until destination reached
+MCU     -> OPD:      odometry
+OPD     -> PU:       position
+GPD     -> PU:       position
+PU      <-> CCU:     current position
+CCU     -> MCU:      target driving\n speed & direction
+end
+
+CCU     -> MCU:     stop motors
+
+CCU     --> CS:     delivery ended
+
+deactivate CCU
+
+&CS     --> FMS:    delivery ended
+&FMS    --> WH:     delivery ended
+
+deactivate FMS
+
+
+@enduml

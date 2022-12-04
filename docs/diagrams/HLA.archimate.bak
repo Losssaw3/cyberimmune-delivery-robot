@@ -519,9 +519,7 @@
           <bendpoint startX="-12" startY="-285" endX="-384" endY="132"/>
           <bendpoint startX="372" startY="-333" endY="228"/>
         </sourceConnection>
-        <sourceConnection xsi:type="archimate:Connection" id="id-92caeea42e7041e7a3f9e86115b13973" source="id-d157286cf15441b281dc0eb560d22f80" target="id-b9797679577f4906a92605027a6daddd" archimateRelationship="id-461000ce7c1a4d3db1712f854b665713">
-          <bendpoint startX="168" startY="15" endX="-180" endY="-15"/>
-        </sourceConnection>
+        <sourceConnection xsi:type="archimate:Connection" id="id-92caeea42e7041e7a3f9e86115b13973" source="id-d157286cf15441b281dc0eb560d22f80" target="id-b9797679577f4906a92605027a6daddd" archimateRelationship="id-461000ce7c1a4d3db1712f854b665713"/>
         <sourceConnection xsi:type="archimate:Connection" id="id-7babfaac60ec4e0580f6fc21d28b63e3" source="id-d157286cf15441b281dc0eb560d22f80" target="id-da6f813d701f4c2abb92afd78b1599ab" archimateRelationship="id-6beb42405a094e19b696122e8bf15048">
           <bendpoint startX="240" startY="15" endX="-108" endY="-99"/>
           <bendpoint startX="240" startY="87" endX="-108" endY="-3"/>
