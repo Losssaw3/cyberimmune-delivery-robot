@@ -3,6 +3,7 @@ package ru.bardinpetr.delivery.libs.crypto;
 import ru.bardinpetr.delivery.libs.crypto.errors.CryptoAlgoException;
 
 import java.security.*;
+import java.util.Base64;
 
 import static ru.bardinpetr.delivery.libs.crypto.utils.RandomUtil.getRng;
 
@@ -30,15 +31,21 @@ public class SignatureCryptoService {
         }
     }
 
-    public byte[] sign(PrivateKey key, String data) {
+    public static byte[] decodeSign(String sign) {
+        return Base64.getDecoder().decode(sign);
+    }
+
+    public String sign(PrivateKey key, String data) {
         var algo = getSignatureAlgo();
+        byte[] sign;
         try {
             algo.initSign(key);
             algo.update(data.getBytes());
-            return algo.sign();
+            sign = algo.sign();
         } catch (SignatureException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
+        return Base64.getEncoder().encodeToString(sign);
     }
 
     public boolean verify(PublicKey key, String data, byte[] signature) {

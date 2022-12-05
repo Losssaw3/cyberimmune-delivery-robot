@@ -21,16 +21,5 @@ public class Main {
 
         var enc = ms.createPin("asdf");
         System.out.println(crypt.decrypt(enc));
-
-
-//        var keystoreSign = new KeystoreServiceSign();
-//
-//        var priv = keystoreSign.getPrivateFromKeystore("server_sign_keystore.p12", "ahmai6oacaitioNg3requohk9OeHijoo");
-//        var pub = keystoreSign.getPublicFromKeystore("client_sign_keystore.p12", "uogh7noh4Ree8huZ9shae7vi6ohphohj");
-//
-//        var sign = new SignatureCryptoService();
-//        var msg = "asd";
-//        var sgn = sign.sign(priv, msg);
-//        System.out.println(sign.verify(pub, "ase", sgn));
     }
 }
