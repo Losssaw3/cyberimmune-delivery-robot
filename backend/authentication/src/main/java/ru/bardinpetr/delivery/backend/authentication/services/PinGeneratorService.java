@@ -1,18 +1,11 @@
 package ru.bardinpetr.delivery.backend.authentication.services;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-public class PinGeneratorService {
-    private SecureRandom secureRandom;
+import static ru.bardinpetr.delivery.libs.crypto.utils.RandomUtil.getRng;
 
-    public PinGeneratorService() {
-        try {
-            secureRandom = SecureRandom.getInstance("NativePRNG");
-        } catch (NoSuchAlgorithmException e) {
-            secureRandom = new SecureRandom();
-        }
-    }
+public class PinGeneratorService {
+    private final SecureRandom secureRandom = getRng();
 
     public String createPin(int digits) {
         int min = (int) Math.pow(10, digits - 1);

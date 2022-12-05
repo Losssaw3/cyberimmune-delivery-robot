@@ -1,11 +1,11 @@
-package ru.bardinpetr.delivery.libs.crypto;
+package ru.bardinpetr.delivery.libs.crypto.data;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 
-public class MsgCoder {
+public class CryptMsgCoder {
     public static final int NONCE_LENGTH = 16;
     private static final int COUNT_LENGTH = 4;
 

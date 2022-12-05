@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.libs.crypto;
 
+import ru.bardinpetr.delivery.libs.crypto.data.CryptMsgCoder;
 import ru.bardinpetr.delivery.libs.crypto.errors.CryptoAlgoException;
 import ru.bardinpetr.delivery.libs.crypto.errors.CryptoException;
 
@@ -8,34 +9,48 @@ import javax.crypto.spec.IvParameterSpec;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
-public class CryptoService {
+import static ru.bardinpetr.delivery.libs.crypto.utils.RandomUtil.genNonce;
+import static ru.bardinpetr.delivery.libs.crypto.utils.RandomUtil.getRng;
 
-    private static final String ALGO = "AES";
-
+public class AESCryptoService {
+    public static final int KEY_SIZE = 256;
+    private final SecretKey key;
     private int counter = 0;
 
+    public AESCryptoService(SecretKey key) {
+        this.key = key;
+    }
+
+    public static SecretKey generate() {
+        try {
+            var gen = KeyGenerator.getInstance("AES");
+            gen.init(KEY_SIZE, getRng());
+            return gen.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new CryptoAlgoException();
+        }
+    }
 
     private Cipher getCipher() {
         Cipher cipher;
         try {
-            cipher = Cipher.getInstance(ALGO + "/CBC/PKCS5Padding");
+            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new CryptoAlgoException();
         }
         return cipher;
     }
 
-    public String encrypt(Key key, String data) {
+    public String encrypt(String data) {
         var cipher = getCipher();
 
         byte[] dataEncoded = data.getBytes(StandardCharsets.UTF_8);
 
         ++counter;
 
-        var nonce = KeyGenService.genNonce(MsgCoder.NONCE_LENGTH);
+        var nonce = genNonce(CryptMsgCoder.NONCE_LENGTH);
         var spec = new IvParameterSpec(nonce);
 
         byte[] enc;
@@ -46,13 +61,13 @@ public class CryptoService {
                  InvalidAlgorithmParameterException e) {
             throw new CryptoException(e);
         }
-        return MsgCoder.encode(enc, nonce, counter);
+        return CryptMsgCoder.encode(enc, nonce, counter);
     }
 
-    public final String decrypt(SecretKey key, String msg) {
+    public final String decrypt(String msg) {
         var cipher = getCipher();
 
-        var msgDecoded = MsgCoder.decode(msg);
+        var msgDecoded = CryptMsgCoder.decode(msg);
 
         var spec = new IvParameterSpec(msgDecoded.nonce());
 
