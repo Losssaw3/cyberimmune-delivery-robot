@@ -1,10 +1,14 @@
 rootProject.name = "delivery"
 include(
     "libs:crypto",
-    "libs:messages",
-    "monitor",
+    "libs:messages"
+)
+include("monitor")
+include(
     "backend:flightmanager",
     "backend:authentication",
-    "backend:store",
+    "backend:store"
+)
+include(
     "robot:hmi"
 )

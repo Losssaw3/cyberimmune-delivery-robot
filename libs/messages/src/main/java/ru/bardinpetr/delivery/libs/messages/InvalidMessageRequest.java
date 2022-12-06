@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.messages;
+package ru.bardinpetr.delivery.libs.messages;
 
 public class InvalidMessageRequest extends MessageRequest {
     public InvalidMessageRequest() {

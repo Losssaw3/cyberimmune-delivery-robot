@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import ru.bardinpetr.delivery.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 
 import java.util.HashMap;
 

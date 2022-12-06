@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.messages;
+package ru.bardinpetr.delivery.libs.messages;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,9 +11,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * then srv2 will reply to topic srv1_action1reply. Topics are generated with lowercase naming of message class name
  */
 
-@JsonIgnoreProperties({"messageIdentifier", "targetTopic", "isValid"})
+@JsonIgnoreProperties({"messageIdentifier", "targetTopic", "valid"})
 public class MessageRequest {
     protected boolean isValid = true;
+
+    private boolean isVerified = false;
     private boolean isReply;
     private String sender = "";
     private String recipient = "";
@@ -48,6 +50,14 @@ public class MessageRequest {
 
     public void setReply(boolean reply) {
         isReply = reply;
+    }
+
+    public boolean isVerified() {
+        return isVerified;
+    }
+
+    public void setVerified(boolean verified) {
+        isVerified = verified;
     }
 
     public String getSender() {

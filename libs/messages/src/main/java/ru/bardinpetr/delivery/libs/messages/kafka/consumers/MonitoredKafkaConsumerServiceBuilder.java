@@ -1,8 +1,8 @@
-package ru.bardinpetr.delivery.messages.kafka;
+package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import ru.bardinpetr.delivery.messages.MessageRequest;
-import ru.bardinpetr.delivery.messages.kafka.interfaces.ITopicListener;
+import ru.bardinpetr.delivery.libs.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.messages;
+package ru.bardinpetr.delivery.libs.messages;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -7,10 +7,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.bardinpetr.delivery.messages.fms.Action1Request;
-import ru.bardinpetr.delivery.messages.kafka.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.messages.kafka.MonitoredKafkaConsumerServiceBuilder;
-import ru.bardinpetr.delivery.messages.kafka.MonitoredKafkaProducerService;
+import ru.bardinpetr.delivery.libs.messages.fms.Action1Request;
+import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,12 +40,12 @@ public class Main {
                 5, 3, TimeUnit.SECONDS
         );
 
-        var kafkaConsumerFactory = MonitoredKafkaConsumerFactory.getConsumerFactory(configs);
-
-        var consumer = new MonitoredKafkaConsumerServiceBuilder("srv0")
-                .setConsumerFactory(kafkaConsumerFactory)
-                .subscribe(Action1Request.class, System.out::println)
-                .build();
-        consumer.start();
+//        var kafkaConsumerFactory = MonitoredKafkaConsumerFactory.getConsumerFactory(configs);
+//
+//        var consumer = new MonitoredKafkaConsumerServiceBuilder("srv0")
+//                .setConsumerFactory(kafkaConsumerFactory)
+//                .subscribe(Action1Request.class, System.out::println)
+//                .build();
+//        consumer.start();
     }
 }

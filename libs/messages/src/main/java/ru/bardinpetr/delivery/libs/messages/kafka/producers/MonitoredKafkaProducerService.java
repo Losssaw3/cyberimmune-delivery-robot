@@ -1,10 +1,10 @@
-package ru.bardinpetr.delivery.messages.kafka;
+package ru.bardinpetr.delivery.libs.messages.kafka.producers;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
-import ru.bardinpetr.delivery.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 
 public class MonitoredKafkaProducerService {
     public static final String MONITOR_TOPIC = "monitor";

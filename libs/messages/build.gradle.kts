@@ -1,7 +1,7 @@
 plugins {
     id("java")
     application
-//    id("java-library")
+    id("java-library")
 }
 
 group = "ru.bardinpetr.delivery.libs.messages"

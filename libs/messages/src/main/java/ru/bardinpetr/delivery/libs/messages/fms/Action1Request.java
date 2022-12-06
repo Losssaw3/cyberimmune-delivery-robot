@@ -1,6 +1,6 @@
-package ru.bardinpetr.delivery.messages.fms;
+package ru.bardinpetr.delivery.libs.messages.fms;
 
-import ru.bardinpetr.delivery.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 
 public class Action1Request extends MessageRequest {
     private String query;

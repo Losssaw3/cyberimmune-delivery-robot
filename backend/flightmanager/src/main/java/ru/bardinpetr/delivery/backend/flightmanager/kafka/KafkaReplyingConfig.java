@@ -6,7 +6,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
-import ru.bardinpetr.delivery.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 
 
 @Configuration

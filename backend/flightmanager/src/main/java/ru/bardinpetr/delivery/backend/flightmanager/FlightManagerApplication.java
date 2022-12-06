@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.SendTo;
-import ru.bardinpetr.delivery.messages.MessageRequest;
-import ru.bardinpetr.delivery.messages.fms.Action1Request;
+import ru.bardinpetr.delivery.libs.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.fms.Action1Request;
 
 @SpringBootApplication
 public class FlightManagerApplication {
