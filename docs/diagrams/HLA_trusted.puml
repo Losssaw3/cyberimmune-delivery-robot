@@ -47,8 +47,8 @@ rectangle Robot {
     SU <-up-> MB: human detection,\nlocker control
     HMI <-> MB : input of PIN code
 
-    OPD <--> MB: odometry raw data
-    GPD <-down-> MB: GPS raw data
+    OPD --> MB: odometry raw data
+    GPD -down-> MB: GPS raw data
 
     U -> HMI: (HTTP) PIN code
 }
