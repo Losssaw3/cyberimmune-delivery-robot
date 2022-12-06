@@ -3,18 +3,13 @@ package ru.bardinpetr.delivery.messages.fms;
 import ru.bardinpetr.delivery.messages.MessageRequest;
 
 public class Action1Request extends MessageRequest {
-
-    public static final String TOPIC = "q";
-
     private String query;
-
 
     public Action1Request() {
         super();
     }
 
-    public Action1Request(String sender, String recipient, String query) {
-        super(sender, recipient);
+    public Action1Request(String query) {
         this.query = query;
     }
 

@@ -1,19 +1,26 @@
 package ru.bardinpetr.delivery.messages;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Naming convention:
  * Any message consists of request and reply - separate classes extending MessageRequest
  * Request and response classes should have the following naming: %ActionName1%Request and %ActionName1%Reply
- * Sending action1 from srv1 to srv2 will result in sending message to topic srv2_Action1Request from srv2 and
- * then srv2 will reply to topic srv1_Action1Reply
+ * Sending action1 from srv1 to srv2 will result in sending message to topic srv2_action1request from srv2 and
+ * then srv2 will reply to topic srv1_action1reply. Topics are generated with lowercase naming of message class name
  */
 
+@JsonIgnoreProperties({"messageIdentifier", "targetTopic", "isValid"})
 public class MessageRequest {
+    protected boolean isValid = true;
+    private boolean isReply;
+    private String sender = "";
+    private String recipient = "";
 
-    private final boolean isReply;
-    private String sender;
-    private String recipient;
+    public MessageRequest() {
+        this.isReply = false;
+    }
 
     public MessageRequest(String sender, String recipient) {
         this();
@@ -27,12 +34,20 @@ public class MessageRequest {
         this.isReply = isReply;
     }
 
-    public MessageRequest() {
-        this.isReply = false;
+    public static String getTargetTopic(Class<? extends MessageRequest> cls, String target) {
+        return "%s_%s".formatted(target, cls.getSimpleName().toLowerCase());
     }
 
-    public static String getAction() {
-        return "";
+    public final String getTargetTopic() {
+        return getTargetTopic(getClass(), recipient);
+    }
+
+    public boolean isReply() {
+        return isReply;
+    }
+
+    public void setReply(boolean reply) {
+        isReply = reply;
     }
 
     public String getSender() {
@@ -51,16 +66,8 @@ public class MessageRequest {
         this.recipient = recipient;
     }
 
-    public boolean isReply() {
-        return isReply;
-    }
-
-    public Reply createReply() {
-        return new Reply(this);
-    }
-
-    public String getIncomingTopic() {
-        return "%s_%s".formatted(recipient, getClass().getSimpleName());
+    public boolean isValid() {
+        return isValid;
     }
 
     @Override
