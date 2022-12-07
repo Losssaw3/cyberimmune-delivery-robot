@@ -1,11 +1,9 @@
 package ru.bardinpetr.delivery.monitor;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.StreamsConfig;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 public class Configuration {
 
@@ -15,18 +13,11 @@ public class Configuration {
         return environ.getOrDefault("KAFKA_BOOTSTRAP_SERVER", "localhost:9092");
     }
 
-    public static Properties getKafkaConsumerParams() {
-        Properties props = new Properties();
-
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "monitor-main");
-        props.put(StreamsConfig.CLIENT_ID_CONFIG, "monitor-%s".formatted(Math.round(Math.random() * 10e6)));
-
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, Configuration.getKafkaURI());
-
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-
+    public static Map<String, Object> getKafkaGlobalParams() {
+        var props = new HashMap<String, Object>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, getKafkaURI());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "monitor-%d".formatted(Math.round(Math.random() * 10e6)));
         return props;
     }
 

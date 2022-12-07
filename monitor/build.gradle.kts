@@ -2,10 +2,12 @@ plugins {
     id("java")
     application
     id("io.freefair.lombok") version "6.6"
+    id("com.palantir.docker") version "0.34.0"
 }
 
 group = "ru.bardinpetr.delivery.monitor"
 version = "0.1"
+
 
 repositories {
     mavenCentral()
@@ -24,4 +26,19 @@ dependencies {
 
 application {
     mainClass.set("${group}.Main")
+}
+
+docker {
+    name = "delivery-monitor"
+
+    buildArgs(
+        mapOf(
+            "VERSION" to project.version.toString(),
+            "PROJECT_NAME" to project.name
+        )
+    )
+
+    setDockerfile(file(project.rootProject.file("docker/java.Dockerfile")))
+
+    files(tasks.distZip)
 }
