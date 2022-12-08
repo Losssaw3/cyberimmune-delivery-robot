@@ -33,15 +33,11 @@ RUN addgroup -g $GROUP_ID $GROUP_NAME &&\
 USER $USER_NAME:$GROUP_NAME
 
 ARG PROJECT_NAME
-ARG VERSION
 
-ARG DEFAULT_PACKAGE=app.zip
+COPY --chown=$USER_NAME:$GROUP_NAME package.zip .
 
-COPY --chown=$USER_NAME:$GROUP_NAME $PROJECT_NAME-$VERSION.zip $DEFAULT_PACKAGE
-
-RUN unzip $DEFAULT_PACKAGE && \
-    rm $DEFAULT_PACKAGE && \
-    mv * package && \
+RUN unzip package.zip && \
+    rm package.zip && \
     mv package/bin/$PROJECT_NAME package/bin/start
 
 ENTRYPOINT ["/app/package/bin/start"]

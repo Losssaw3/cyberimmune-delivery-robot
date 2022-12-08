@@ -1,19 +1,9 @@
 plugins {
-    id("java")
-    application
-    id("java-library")
+    id("delivery.app-conventions")
 }
 
 group = "ru.bardinpetr.delivery.libs.messages"
-//version="v0.1.0"
-
-repositories {
-    mavenCentral()
-}
-
-application {
-    mainClass.set("ru.bardinpetr.delivery.libs.messages.Main")
-}
+version = "v0.1"
 
 dependencies {
     implementation("org.springframework.kafka:spring-kafka:2.8.10")

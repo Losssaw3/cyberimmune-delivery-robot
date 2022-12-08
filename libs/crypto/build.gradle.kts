@@ -1,13 +1,9 @@
 plugins {
-    id("java")
+    id("delivery.lib-conventions")
 }
 
 version = "1.0"
 group = "ru.bardinpetr.delivery.libs.crypto"
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
