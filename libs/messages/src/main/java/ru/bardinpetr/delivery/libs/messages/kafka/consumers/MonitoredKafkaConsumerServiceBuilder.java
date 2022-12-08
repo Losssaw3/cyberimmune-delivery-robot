@@ -1,6 +1,5 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
 
@@ -10,18 +9,18 @@ import java.util.Map;
 public class MonitoredKafkaConsumerServiceBuilder {
     private final Map<String, ITopicListener> listenerMap = new HashMap<>();
     private final String selfTopicName;
-    private DefaultKafkaConsumerFactory<String, MessageRequest> consumerFactory;
+    private MonitoredKafkaConsumerFactory consumerFactory;
 
     public MonitoredKafkaConsumerServiceBuilder(String selfTopicName) {
         this.selfTopicName = selfTopicName;
     }
 
-    public MonitoredKafkaConsumerServiceBuilder setConsumerFactory(DefaultKafkaConsumerFactory<String, MessageRequest> consumerFactory) {
+    public MonitoredKafkaConsumerServiceBuilder setConsumerFactory(MonitoredKafkaConsumerFactory consumerFactory) {
         this.consumerFactory = consumerFactory;
         return this;
     }
 
-    public MonitoredKafkaConsumerServiceBuilder subscribe(Class<? extends MessageRequest> topicType, ITopicListener listener) {
+    public <T extends MessageRequest> MonitoredKafkaConsumerServiceBuilder subscribe(Class<T> topicType, ITopicListener<T> listener) {
         var topic = MessageRequest.getTargetTopic(topicType, selfTopicName);
         this.listenerMap.put(topic, listener);
         return this;

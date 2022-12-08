@@ -9,26 +9,21 @@ import java.util.Map;
 
 import static ru.bardinpetr.delivery.libs.messages.kafka.consumers.DeserializerFactory.getDeserializer;
 
-public class MonitoredKafkaConsumerFactory {
+public class MonitoredKafkaConsumerFactory extends DefaultKafkaConsumerFactory<String, MessageRequest> {
 
 
-    public static DefaultKafkaConsumerFactory<String, MessageRequest> getConsumerFactory(Map<String, Object> configs) {
-        return new DefaultKafkaConsumerFactory<>(
+    public MonitoredKafkaConsumerFactory(Map<String, Object> configs, ErrorHandlingDeserializer<MessageRequest> deserializer) {
+        super(
                 configs,
                 new StringDeserializer(),
-                getDeserializer()
-        );
+                deserializer);
     }
 
-    public static DefaultKafkaConsumerFactory<String, MessageRequest> getConsumerFactory(
-            Map<String, Object> configs,
-            ErrorHandlingDeserializer<MessageRequest> deserializer
-    ) {
-        return new DefaultKafkaConsumerFactory<>(
+    public MonitoredKafkaConsumerFactory(Map<String, Object> configs) {
+        super(
                 configs,
                 new StringDeserializer(),
-                deserializer
-        );
+                getDeserializer());
     }
 
 }

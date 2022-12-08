@@ -2,6 +2,7 @@ package ru.bardinpetr.delivery.libs.messages;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 /**
  * Naming convention:
@@ -12,28 +13,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 
 @JsonIgnoreProperties({"messageIdentifier", "targetTopic", "valid"})
+@Data
 public class MessageRequest {
     protected boolean isValid = true;
-
-    private boolean isVerified = false;
-    private boolean isReply;
-    private String sender = "";
     private String recipient = "";
+    private String sender = "";
+    private boolean isVerified = false;
+    private boolean isReply = false;
+
+    public MessageRequest(String recipient, String sender) {
+        this.recipient = recipient;
+        this.sender = sender;
+    }
 
     public MessageRequest() {
-        this.isReply = false;
-    }
-
-    public MessageRequest(String sender, String recipient) {
-        this();
-        this.sender = sender;
-        this.recipient = recipient;
-    }
-
-    public MessageRequest(String sender, String recipient, boolean isReply) {
-        this.sender = sender;
-        this.recipient = recipient;
-        this.isReply = isReply;
     }
 
     public static String getTargetTopic(Class<? extends MessageRequest> cls, String target) {
@@ -44,53 +37,11 @@ public class MessageRequest {
         return getTargetTopic(getClass(), recipient);
     }
 
-    public boolean isReply() {
-        return isReply;
-    }
-
-    public void setReply(boolean reply) {
-        isReply = reply;
-    }
-
-    public boolean isVerified() {
-        return isVerified;
-    }
-
-    public void setVerified(boolean verified) {
-        isVerified = verified;
-    }
-
-    public String getSender() {
-        return sender;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
-    public String getRecipient() {
-        return recipient;
-    }
-
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
-    }
-
-    public boolean isValid() {
-        return isValid;
-    }
-
     @Override
     public String toString() {
         return "MessageRequest{" +
                 "sender='" + sender + '\'' +
                 ", recipient='" + recipient + '\'' +
                 '}';
-    }
-
-    public static class Reply extends MessageRequest {
-        public Reply(MessageRequest base) {
-            super(base.getRecipient(), base.getSender(), true);
-        }
     }
 }

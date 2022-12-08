@@ -7,11 +7,10 @@ import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 
 import java.util.Map;
 
-public class MonitoredKafkaProducerFactory {
+public class MonitoredKafkaProducerFactory extends DefaultKafkaProducerFactory<String, MessageRequest> {
 
-    public static DefaultKafkaProducerFactory<String, MessageRequest> getProducerFactory(Map<String, Object> configs) {
-        return new DefaultKafkaProducerFactory<>(
-                configs,
+    public MonitoredKafkaProducerFactory(Map<String, Object> configs) {
+        super(configs,
                 new StringSerializer(),
                 new JsonSerializer<>()
         );

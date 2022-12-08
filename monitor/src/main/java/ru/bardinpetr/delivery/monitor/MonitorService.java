@@ -22,19 +22,20 @@ public class MonitorService {
     public MonitorService(Map<String, Object> kafkaConfig, IValidator[] validators) {
         this.validators = validators;
 
-        var producerFactory = MonitoredKafkaProducerFactory.getProducerFactory(kafkaConfig);
-        producer = new MonitorProducerService(producerFactory);
+        producer = new MonitorProducerService(
+                new MonitoredKafkaProducerFactory(kafkaConfig)
+        );
 
         var deserializer = DeserializerFactory.getDeserializer(this::onDeserializeError);
 
-        var consumerFactory = MonitoredKafkaConsumerFactory.getConsumerFactory(
+        var consumerFactory = new MonitoredKafkaConsumerFactory(
                 kafkaConfig, deserializer
         );
         consumer = new MonitorConsumerService(consumerFactory, this::onMessage);
     }
 
     private MessageRequest onDeserializeError(FailedDeserializationInfo info) {
-        System.err.println(info);
+        System.err.printf("Invalid message on topic %s: error %s\n", info.getTopic(), info.getException().toString());
         return null;
     }
 
@@ -55,7 +56,7 @@ public class MonitorService {
             return;
         }
 
-        System.out.printf("Allowed message: %s", data);
+        System.out.printf("Allowed message: %s\n", data);
         producer.sendMessage(data);
     }
 

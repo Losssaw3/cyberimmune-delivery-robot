@@ -1,7 +1,6 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
@@ -16,7 +15,7 @@ public class MonitoredKafkaConsumerService {
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
 
 
-    protected MonitoredKafkaConsumerService(DefaultKafkaConsumerFactory<String, MessageRequest> consumerFactory, Map<String, ITopicListener> listenerMap) {
+    protected MonitoredKafkaConsumerService(MonitoredKafkaConsumerFactory consumerFactory, Map<String, ITopicListener> listenerMap) {
         this.listenerMap = listenerMap;
 
         var topics = new String[listenerMap.size()];
@@ -32,7 +31,7 @@ public class MonitoredKafkaConsumerService {
         container.start();
     }
 
-    private void onMessage(ConsumerRecord<String, MessageRequest> data) {
+    private <T extends MessageRequest> void onMessage(ConsumerRecord<String, T> data) {
         var topic = data.topic();
         var message = data.value();
         if (!message.isValid()) return;
