@@ -1,25 +1,23 @@
 package ru.bardinpetr.delivery.backend.authentication;
 
 
-import ru.bardinpetr.delivery.backend.authentication.services.PinGeneratorService;
-import ru.bardinpetr.delivery.backend.authentication.services.messaging.SenderService;
-import ru.bardinpetr.delivery.libs.crypto.AESCryptoService;
 import ru.bardinpetr.delivery.libs.crypto.keystore.KeystoreServicePin;
+import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
+
+import static ru.bardinpetr.delivery.backend.authentication.AuthenticationService.SERVICE_NAME;
 
 
 public class Main {
     public static void main(String[] args) {
+        var kafkaConfig = CommonKafkaConfiguration.getKafkaGlobalParams(
+                Configuration.getKafkaURI(),
+                SERVICE_NAME
+        );
 
-        var keystorePIN = new KeystoreServicePin();
-        var secret = keystorePIN.getFromKeystore("secret_keystore.p12", "kiuw2ka7ahSeeTh2wieb6ohy1Xu3haj4");
+        var secret = new KeystoreServicePin()
+                .getFromKeystore(Configuration.getKeyPath(), Configuration.getKeyPassword());
 
-        var ping = new PinGeneratorService();
-        var crypt = new AESCryptoService(secret);
-        var snd = new SenderService();
-
-        var ms = new AuthenticationService(ping, crypt, snd);
-
-        var enc = ms.createPin("asdf");
-        System.out.println(crypt.decrypt(enc));
+        var main = new AuthenticationService(kafkaConfig, secret);
+        main.start();
     }
 }

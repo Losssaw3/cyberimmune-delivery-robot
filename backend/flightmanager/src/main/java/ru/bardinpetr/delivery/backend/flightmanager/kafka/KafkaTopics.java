@@ -6,7 +6,7 @@ import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import ru.bardinpetr.delivery.libs.messages.MessageRequest;
-import ru.bardinpetr.delivery.libs.messages.fms.Action1Request;
+import ru.bardinpetr.delivery.libs.messages.models.fms.Action1Request;
 
 import java.util.List;
 import java.util.Map;

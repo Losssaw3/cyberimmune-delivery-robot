@@ -49,3 +49,14 @@ services:
       - broker
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29092'
+
+  authentication-service:
+    image: delivery-authentication:latest
+    depends_on:
+      - broker
+    volumes:
+      - ./certs/secret_keystore.p12:/app/secret_keystore.p12:ro
+    environment:
+      KEYSTORE_PATH: '/app/secret_keystore.p12'
+      KEYSTORE_PASSWORD: 'kiuw2ka7ahSeeTh2wieb6ohy1Xu3haj4'
+      KAFKA_BOOTSTRAP_SERVER: 'broker:29092'
