@@ -9,21 +9,27 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.regex.Pattern;
 
+/**
+ * User interface for HMI unit based on HTTP GET requests.
+ * Exposes a server with endpoint /pin; use 'code' param to send 6-digit pin code
+ */
 public class HTTPUserInteractor implements IUserInteractor {
 
-    private static final Pattern pinQueryPattern = Pattern.compile("^code=(\\d{6})$", Pattern.CASE_INSENSITIVE);
-    private HttpServer server;
+    private static final Pattern pinQueryPattern = Pattern.compile("^code=(\\d+)$", Pattern.CASE_INSENSITIVE);
+    private final HttpServer server;
     private PinHandler handler;
 
-    public void start() {
+    public HTTPUserInteractor(int port) {
         try {
-            server = HttpServer.create(new InetSocketAddress(8888), 0);
+            server = HttpServer.create(new InetSocketAddress(port), 0);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         server.createContext("/pin", this::handle);
         server.setExecutor(null);
+    }
+
+    public void start() {
         server.start();
     }
 

@@ -3,7 +3,7 @@ FROM gradle:7.6.0-jdk17-alpine as buildJRE
 RUN apk add --no-cache binutils
 
 RUN $JAVA_HOME/bin/jlink \
-         --add-modules java.base,java.logging,java.net.http,java.prefs,java.se \
+         --add-modules java.base,java.logging,java.net.http,java.prefs,java.se,jdk.httpserver \
          --strip-debug \
          --no-man-pages \
          --no-header-files \
