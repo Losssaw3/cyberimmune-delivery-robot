@@ -1,19 +1,19 @@
 package ru.bardinpetr.delivery.libs.messages;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@ToString(callSuper = true)
 public class ReplyableMessageRequest extends MessageRequest {
 
-    private int requestId = -1;
-
-    public MessageRequest getReply() {
-        return null;
+    public MessageRequest makeReply(MessageRequest src) {
+        return new MessageRequest(true,
+                src.getRequestId(),
+                src.getSender(), src.getRecipient(),
+                false, true
+        );
     }
 
 

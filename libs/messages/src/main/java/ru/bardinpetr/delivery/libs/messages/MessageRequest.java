@@ -2,6 +2,7 @@ package ru.bardinpetr.delivery.libs.messages;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -14,8 +15,12 @@ import lombok.Data;
 
 @JsonIgnoreProperties({"messageIdentifier", "targetTopic", "valid"})
 @Data
+@AllArgsConstructor
 public class MessageRequest {
-    protected boolean isValid = true;
+
+    private boolean isValid = true;
+
+    private int requestId = -1;
     private String recipient = "";
     private String sender = "";
     private boolean isVerified = false;
@@ -24,6 +29,10 @@ public class MessageRequest {
     public MessageRequest(String recipient, String sender) {
         this.recipient = recipient;
         this.sender = sender;
+    }
+
+    public MessageRequest(boolean isValid) {
+        this.isValid = isValid;
     }
 
     public MessageRequest() {
@@ -35,13 +44,5 @@ public class MessageRequest {
 
     public final String getTargetTopic() {
         return getTargetTopic(getClass(), recipient);
-    }
-
-    @Override
-    public String toString() {
-        return "MessageRequest{" +
-                "sender='" + sender + '\'' +
-                ", recipient='" + recipient + '\'' +
-                '}';
     }
 }

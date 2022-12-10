@@ -12,11 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-public class MonitoredKafkaRequesterService extends Thread {
+public class MonitoredKafkaRequesterService {//} extends Thread {
 
-    private final ConcurrentMap<Integer, CompletableFuture<ReplyableMessageRequest>> futures;
-
-    private final List<Class<? extends ReplyableMessageRequest>> consumedMessageTypes;
+    private final ConcurrentMap<Integer, CompletableFuture<MessageRequest>> futures;
 
     private final MonitoredKafkaProducerService producer;
     private final MonitoredKafkaConsumerService consumer;
@@ -25,14 +23,13 @@ public class MonitoredKafkaRequesterService extends Thread {
 
     public MonitoredKafkaRequesterService(
             String selfServiceName,
-            List<Class<? extends ReplyableMessageRequest>> consumedMessageTypes,
+            List<Class<? extends MessageRequest>> consumedMessageTypes,
             MonitoredKafkaProducerFactory producerFactory,
             MonitoredKafkaConsumerFactory consumerFactory) {
-        this.consumedMessageTypes = consumedMessageTypes;
 
         futures = new ConcurrentHashMap<>();
 
-        final ITopicListener<? extends ReplyableMessageRequest> listener = this::onReplyMessage;
+        final ITopicListener<? extends MessageRequest> listener = this::onReplyMessage;
         var listeners =
                 consumedMessageTypes.stream()
                         .collect(Collectors.toMap(
@@ -47,25 +44,28 @@ public class MonitoredKafkaRequesterService extends Thread {
         producer = new MonitoredKafkaProducerService(selfServiceName, producerFactory);
     }
 
-    public void run() {
-        consumer.run();
+    //    @Override
+    public void start() {
+        consumer.start();
     }
 
-    public CompletableFuture<ReplyableMessageRequest> request(String recipient, ReplyableMessageRequest request) {
+    public CompletableFuture<MessageRequest> request(String recipient, ReplyableMessageRequest request) {
         var id = messageId++;
         request.setRequestId(id);
         producer.sendMessage(recipient, request);
 
-        var future = new CompletableFuture<ReplyableMessageRequest>();
+        var future = new CompletableFuture<MessageRequest>();
         futures.put(id, future);
         return future;
     }
 
-    private void onReplyMessage(ReplyableMessageRequest message) {
+    private void onReplyMessage(MessageRequest message) {
         var id = message.getRequestId();
+        System.out.printf("[RS_RECV] ID%s msg %s\n", id, message);
 
         var future = futures.get(id);
-        if (future == null) return;
+        if (future == null)
+            throw new RuntimeException("Got message with invalid identifier. Could not find listener");
 
         if (!message.isValid())
             future.completeExceptionally(new RuntimeException("message invalid"));

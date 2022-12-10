@@ -9,7 +9,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
 
 import java.util.Map;
 
-public class MonitoredKafkaConsumerService extends Thread {
+public class MonitoredKafkaConsumerService { //extends Thread {
 
     private final Map<String, ITopicListener> listenerMap;
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
@@ -27,8 +27,8 @@ public class MonitoredKafkaConsumerService extends Thread {
         container = new ConcurrentMessageListenerContainer<>(consumerFactory, containerProperties);
     }
 
-    @Override
-    public void run() {
+    //    @Override
+    public void start() {
         container.start();
     }
 
@@ -36,6 +36,8 @@ public class MonitoredKafkaConsumerService extends Thread {
         var topic = data.topic();
         var message = data.value();
         if (!message.isValid()) return;
+
+        System.out.printf("[RECV] from %s msg: %s", message.getSender(), message);
 
         listenerMap.get(topic).onMessage(message);
     }

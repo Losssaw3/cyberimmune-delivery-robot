@@ -10,5 +10,6 @@ include(
     "backend:store"
 )
 include(
-    "robot:hmi"
+    "robot:hmi",
+    "robot:motion"
 )
