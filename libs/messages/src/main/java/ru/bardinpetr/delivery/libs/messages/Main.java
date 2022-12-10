@@ -1,11 +1,14 @@
 package ru.bardinpetr.delivery.libs.messages;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
+import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.models.authentication.CreatePINRequest;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -21,22 +24,46 @@ public class Main {
         configs.put(ConsumerConfig.GROUP_ID_CONFIG, "cg-unit-%d".formatted(Math.round(Math.random() * 10e6)));
 
         var producerFactory = new MonitoredKafkaProducerFactory(configs);
-        var producer = new MonitoredKafkaProducerService("test", producerFactory);
+        var kafkaConsumerFactory = new MonitoredKafkaConsumerFactory(configs);
+
+        var rep = new MonitoredKafkaRequesterService(
+                "test",
+                List.of(ReplyableMessageRequest.class),
+                producerFactory,
+                kafkaConsumerFactory
+        );
+
+        var producer = new MonitoredKafkaProducerService("test2", producerFactory);
+        var consumer = new MonitoredKafkaConsumerServiceBuilder("test2")
+                .setConsumerFactory(kafkaConsumerFactory)
+                .subscribe(ReplyableMessageRequest.class, i -> {
+                    System.out.printf("OK %s", i);
+                    producer.sendMessage(i.getSender(), i);
+                })
+                .build();
 
         var sched = Executors.newSingleThreadScheduledExecutor();
-        sched.scheduleWithFixedDelay(() -> producer.sendMessage(
-                "authentication",
-                new CreatePINRequest("test")
-        ), 0, 10, TimeUnit.SECONDS);
+        sched.scheduleWithFixedDelay(() -> {
+                    try {
+                        System.out.println(rep.request("test2", new ReplyableMessageRequest()).get());
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                10, 30, TimeUnit.SECONDS);
+
+        consumer.start();
+        rep.start();
+//
+//        var sched = Executors.newSingleThreadScheduledExecutor();
+//        sched.scheduleWithFixedDelay(() -> producer.sendMessage(
+//                "authentication",
+//                new CreatePINRequest("test")
+//        ), 0, 10, TimeUnit.SECONDS);
 
 //        producer.sendMessage("authentication", new CreatePINRequest("test"));
 
-//        var kafkaConsumerFactory = new MonitoredKafkaConsumerFactory(configs);
 //
-//        var consumer = new MonitoredKafkaConsumerServiceBuilder("srv0")
-//                .setConsumerFactory(kafkaConsumerFactory)
-//                .subscribe(Action1Request.class, System.out::println)
-//                .build();
-//        consumer.start();
+
     }
 }

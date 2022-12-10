@@ -9,7 +9,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
 
 import java.util.Map;
 
-public class MonitoredKafkaConsumerService {
+public class MonitoredKafkaConsumerService extends Thread {
 
     private final Map<String, ITopicListener> listenerMap;
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
@@ -27,7 +27,8 @@ public class MonitoredKafkaConsumerService {
         container = new ConcurrentMessageListenerContainer<>(consumerFactory, containerProperties);
     }
 
-    public void start() {
+    @Override
+    public void run() {
         container.start();
     }
 

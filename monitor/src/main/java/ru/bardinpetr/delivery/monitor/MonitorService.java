@@ -56,12 +56,12 @@ public class MonitorService {
             return;
         }
 
-        System.out.printf("Allowed message: %s\n", data);
+        System.out.printf("Allowed message from %s to %s: %s\n", data.getSender(), data.getRecipient(), data);
         producer.sendMessage(data);
     }
 
     private void processInvalid(MessageRequest data) {
-        System.err.printf("Rejected message: %s", data);
+        System.out.printf("Rejected message from %s to %s: %s\n", data.getSender(), data.getRecipient(), data);
     }
 
     public void start() {
