@@ -5,8 +5,8 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.models.hmi.PINEnterRequest;
-import ru.bardinpetr.delivery.libs.messages.models.hmi.PINValidationResponse;
+import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINValidationResponse;
 import ru.bardinpetr.delivery.robot.hmi.interactors.IUserInteractor;
 
 import java.time.LocalTime;

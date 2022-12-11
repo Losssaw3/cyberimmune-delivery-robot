@@ -1,6 +1,6 @@
 package ru.bardinpetr.delivery.robot.location.aggregator;
 
-import ru.bardinpetr.delivery.libs.messages.models.location.Position;
+import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 
 import java.util.HashMap;
 import java.util.List;

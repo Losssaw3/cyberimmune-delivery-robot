@@ -1,6 +1,6 @@
 package ru.bardinpetr.delivery.robot.location;
 
-import ru.bardinpetr.delivery.libs.messages.models.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
 
 import java.util.List;
 import java.util.Map;

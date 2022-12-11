@@ -3,10 +3,10 @@ package ru.bardinpetr.delivery.robot.odometer.hardware;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.models.Units;
-import ru.bardinpetr.delivery.libs.messages.models.location.Position;
-import ru.bardinpetr.delivery.libs.messages.models.motion.GetMotionDataReply;
-import ru.bardinpetr.delivery.libs.messages.models.motion.GetMotionDataRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataReply;
+import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataRequest;
 import ru.bardinpetr.delivery.robot.positioning_driver.IPositionService;
 
 import java.util.List;

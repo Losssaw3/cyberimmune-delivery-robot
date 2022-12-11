@@ -1,13 +1,13 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class MonitoredKafkaConsumerServiceBuilder {
-    private final Map<String, ITopicListener> listenerMap = new HashMap<>();
+    private final Map<String, ITopicListener<?>> listenerMap = new HashMap<>();
     private final String selfTopicName;
     private MonitoredKafkaConsumerFactory consumerFactory;
 

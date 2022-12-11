@@ -1,12 +1,12 @@
 package ru.bardinpetr.delivery.robot.motion.hardware;
 
-import ru.bardinpetr.delivery.libs.messages.models.location.Position;
+import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
 public class MotorController {
     private final InternalOdometryController odometryController;
     private final MotorRestrictions restrictions;
-    private MotorParams currentTarget;
+    private MotorParams currentTarget = new MotorParams();
 
     public MotorController(MotorRestrictions restrictions) {
         this.restrictions = restrictions;

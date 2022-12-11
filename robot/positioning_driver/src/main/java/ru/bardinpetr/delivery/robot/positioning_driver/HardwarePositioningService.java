@@ -5,8 +5,8 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.models.location.PositionReply;
-import ru.bardinpetr.delivery.libs.messages.models.location.PositionRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
+import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
 
 /**
  * Provides low-level communication with hardware positioning unit.

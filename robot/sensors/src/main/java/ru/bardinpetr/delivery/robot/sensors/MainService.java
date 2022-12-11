@@ -5,9 +5,9 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.models.Units;
-import ru.bardinpetr.delivery.libs.messages.models.sensors.HumanDetectedRequest;
-import ru.bardinpetr.delivery.libs.messages.models.sensors.HumanDetectionConfigRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectedRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 import ru.bardinpetr.delivery.robot.sensors.hardware.PositioningHumanDetector;
 
 /**

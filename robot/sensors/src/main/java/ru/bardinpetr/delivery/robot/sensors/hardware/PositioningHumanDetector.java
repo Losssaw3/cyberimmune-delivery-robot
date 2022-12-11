@@ -3,11 +3,11 @@ package ru.bardinpetr.delivery.robot.sensors.hardware;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.models.Units;
-import ru.bardinpetr.delivery.libs.messages.models.location.Position;
-import ru.bardinpetr.delivery.libs.messages.models.location.PositionReply;
-import ru.bardinpetr.delivery.libs.messages.models.location.PositionRequest;
-import ru.bardinpetr.delivery.libs.messages.models.sensors.HumanDetectionConfigRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
+import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 
 import java.util.List;
 import java.util.concurrent.*;

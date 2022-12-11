@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.libs.messages.models;
+package ru.bardinpetr.delivery.libs.messages.msg;
 
 public enum Units {
     CCU("central"),

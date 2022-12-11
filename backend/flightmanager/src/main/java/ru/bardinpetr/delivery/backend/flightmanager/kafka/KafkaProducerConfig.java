@@ -9,7 +9,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 import java.util.HashMap;
 

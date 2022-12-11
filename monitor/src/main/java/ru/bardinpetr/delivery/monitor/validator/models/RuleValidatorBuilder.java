@@ -1,6 +1,6 @@
 package ru.bardinpetr.delivery.monitor.validator.models;
 
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.monitor.validator.RuleValidator;
 
 import java.util.HashMap;

@@ -5,7 +5,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.models.motion.*;
+import ru.bardinpetr.delivery.libs.messages.msg.motion.*;
 import ru.bardinpetr.delivery.robot.motion.hardware.MotorController;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
@@ -44,7 +44,6 @@ public class MainService {
     }
 
     private void replyWithRestrictions(GetRestrictionsRequest request) {
-        System.out.println(request);
         producerService.sendReply(request,
                 new GetRestrictionsReply(motorController.getRestrictions().getMaxSpeed())
         );

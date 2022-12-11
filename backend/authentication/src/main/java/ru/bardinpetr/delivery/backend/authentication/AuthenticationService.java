@@ -8,8 +8,8 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.models.authentication.CreatePINRequest;
-import ru.bardinpetr.delivery.libs.messages.models.authentication.CreatePINResponse;
+import ru.bardinpetr.delivery.libs.messages.msg.authentication.CreatePINRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.authentication.CreatePINResponse;
 
 import javax.crypto.SecretKey;
 import java.util.Map;

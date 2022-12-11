@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.libs.messages.models.location;
+package ru.bardinpetr.delivery.libs.messages.msg.location;
 
 
 import lombok.Data;

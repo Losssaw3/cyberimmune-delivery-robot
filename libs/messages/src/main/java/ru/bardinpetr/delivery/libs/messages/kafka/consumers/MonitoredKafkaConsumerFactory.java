@@ -3,7 +3,7 @@ package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 import java.util.Map;
 

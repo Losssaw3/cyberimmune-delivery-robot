@@ -2,10 +2,10 @@ package ru.bardinpetr.delivery.monitor;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.support.serializer.FailedDeserializationInfo;
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.DeserializerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.monitor.kafka.MonitorConsumerService;
 import ru.bardinpetr.delivery.monitor.kafka.MonitorProducerService;
 import ru.bardinpetr.delivery.monitor.validator.IValidator;

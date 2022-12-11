@@ -1,12 +1,13 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
-import ru.bardinpetr.delivery.libs.messages.ReplyableMessageRequest;
 import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.ReplyableMessageRequest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -14,12 +15,12 @@ import java.util.stream.Collectors;
 
 public class MonitoredKafkaRequesterService extends Thread {
 
-    private final ConcurrentMap<Integer, CompletableFuture<MessageRequest>> futures;
+    private final ConcurrentMap<String, CompletableFuture<MessageRequest>> futures;
 
     private final MonitoredKafkaProducerService producer;
     private final MonitoredKafkaConsumerService consumer;
 
-    private int messageId = 0;
+    private final int messageId = 0;
 
     public MonitoredKafkaRequesterService(
             String selfServiceName,
@@ -29,12 +30,12 @@ public class MonitoredKafkaRequesterService extends Thread {
 
         futures = new ConcurrentHashMap<>();
 
-        final ITopicListener<? extends MessageRequest> listener = this::onReplyMessage;
-        var listeners =
+        final ITopicListener<MessageRequest> listener = this::onReplyMessage;
+        Map<String, ITopicListener<?>> listeners =
                 consumedMessageTypes.stream()
                         .collect(Collectors.toMap(
                                 cls -> MessageRequest.getTargetTopic(cls, selfServiceName),
-                                cls -> (ITopicListener) listener
+                                cls -> listener
                         ));
 
         consumer = new MonitoredKafkaConsumerService(
@@ -50,12 +51,10 @@ public class MonitoredKafkaRequesterService extends Thread {
     }
 
     public CompletableFuture<MessageRequest> request(String recipient, ReplyableMessageRequest request) {
-        var id = messageId++;
-        request.setRequestId(id);
-        producer.sendMessage(recipient, request);
+        var id = producer.sendMessage(recipient, request);
 
         var future = new CompletableFuture<MessageRequest>();
-        futures.put(id, future);
+        futures.put(MessageRequest.getReplyMessageID(id), future);
         return future;
     }
 

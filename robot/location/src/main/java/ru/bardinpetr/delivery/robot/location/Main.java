@@ -3,7 +3,7 @@ package ru.bardinpetr.delivery.robot.location;
 import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.models.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
 import ru.bardinpetr.delivery.robot.location.aggregator.PositionAggregator;
 
 

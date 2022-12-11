@@ -4,7 +4,7 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
-import ru.bardinpetr.delivery.libs.messages.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 public class MonitorConsumerService {
 
