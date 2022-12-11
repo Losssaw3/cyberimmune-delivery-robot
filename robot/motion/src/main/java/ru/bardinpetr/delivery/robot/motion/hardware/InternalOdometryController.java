@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.motion.hardware;
 
+import ru.bardinpetr.delivery.libs.messages.models.location.Position;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
 import java.time.Duration;
@@ -12,17 +13,17 @@ import java.time.Instant;
 public class InternalOdometryController {
 
     private MotorParams motors = new MotorParams(0, 0);
-    private double[] position = new double[]{0, 0};
+    private Position position;
     private Instant lastUpdateTime;
 
-    public double[] getPosition() {
+    public Position getPosition() {
         if (lastUpdateTime == null) return position;
 
         var delta = Duration.between(lastUpdateTime, Instant.now()).toSeconds();
         var speedX = motors.getSpeed() * Math.cos(motors.getDirection());
         var speedY = motors.getSpeed() * Math.sin(motors.getDirection());
 
-        return new double[]{position[0] + speedX * delta, position[1] + speedY * delta};
+        return new Position(position.getX() + speedX * delta, position.getY() + speedY * delta);
     }
 
     public void update(MotorParams currentTarget) {

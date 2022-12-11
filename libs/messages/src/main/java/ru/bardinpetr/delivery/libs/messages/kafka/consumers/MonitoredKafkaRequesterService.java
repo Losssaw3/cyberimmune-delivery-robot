@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-public class MonitoredKafkaRequesterService {//} extends Thread {
+public class MonitoredKafkaRequesterService extends Thread {
 
     private final ConcurrentMap<Integer, CompletableFuture<MessageRequest>> futures;
 
@@ -44,8 +44,8 @@ public class MonitoredKafkaRequesterService {//} extends Thread {
         producer = new MonitoredKafkaProducerService(selfServiceName, producerFactory);
     }
 
-    //    @Override
-    public void start() {
+    @Override
+    public void run() {
         consumer.start();
     }
 
@@ -73,4 +73,5 @@ public class MonitoredKafkaRequesterService {//} extends Thread {
             future.complete(message);
         futures.remove(id);
     }
+
 }

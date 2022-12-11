@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.motion.hardware;
 
+import ru.bardinpetr.delivery.libs.messages.models.location.Position;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
 public class MotorController {
@@ -26,7 +27,7 @@ public class MotorController {
         return currentTarget;
     }
 
-    public double[] getReferenceIdealPosition() {
+    public Position getReferenceIdealPosition() {
         return odometryController.getPosition();
     }
 }

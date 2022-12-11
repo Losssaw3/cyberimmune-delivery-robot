@@ -11,5 +11,10 @@ include(
 )
 include(
     "robot:hmi",
-    "robot:motion"
+    "robot:motion",
+    "robot:locker",
+    "robot:sensors",
+    "robot:positioning_driver",
+    "robot:odometer",
+    "robot:location",
 )

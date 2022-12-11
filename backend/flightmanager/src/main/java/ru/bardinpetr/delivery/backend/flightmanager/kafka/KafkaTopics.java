@@ -6,7 +6,6 @@ import org.apache.kafka.common.header.Headers;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import ru.bardinpetr.delivery.libs.messages.MessageRequest;
-import ru.bardinpetr.delivery.libs.messages.models.fms.Action1Request;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,7 @@ public class KafkaTopics {
 
     private static final TypeFactory jsonTypeFactory = TypeFactory.defaultInstance();
     private static final List<Class<? extends MessageRequest>> incomingMessageTypes =
-            List.of(Action1Request.Reply.class, Action1Request.class);
+            List.of();
     @Value("ru.bardinpetr.delivery.kafka-base-topic")
     private static String baseTopic;
     private static final Map<Predicate<String>, JavaType> incomingTopicType =

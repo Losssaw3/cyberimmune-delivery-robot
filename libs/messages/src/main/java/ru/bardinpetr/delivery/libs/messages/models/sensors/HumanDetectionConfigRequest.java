@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.libs.messages.models.motion;
+package ru.bardinpetr.delivery.libs.messages.models.sensors;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,9 +9,7 @@ import ru.bardinpetr.delivery.libs.messages.models.location.Position;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetMotionDataReply extends MessageRequest {
-    private double currentSpeed;
-    private double currentAngle;
-    private Position odometerPosition;
+public class HumanDetectionConfigRequest extends MessageRequest {
+    private Position location;
+    private double accuracy;
 }
-

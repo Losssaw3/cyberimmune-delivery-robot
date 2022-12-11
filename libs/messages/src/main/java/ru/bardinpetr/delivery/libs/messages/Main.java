@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -42,28 +44,23 @@ public class Main {
 
         rep.start();
 
-        Thread.sleep(15000);
+//        Thread.sleep(15000);
         System.out.println("started");
-        var res = rep.request("motion", new GetRestrictionsRequest());
-
-
-        System.out.println(res.get());
 
 //        var res2 = rep.request("motion", new GetMotionDataRequest()).get();
 //        System.out.println(res2);
 
 
 //
-//        var sched = Executors.newSingleThreadScheduledExecutor();
-//        sched.scheduleWithFixedDelay(() -> {
-//                    try {
-//                        System.out.println(rep.request("test2", new ReplyableMessageRequest()).get());
-//                    } catch (InterruptedException | ExecutionException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                },
-//                10, 30, TimeUnit.SECONDS);
-//        consumer.start();
+        var sched = Executors.newSingleThreadScheduledExecutor();
+        sched.scheduleWithFixedDelay(() -> {
+                    try {
+                        System.out.println(rep.request("motion", new GetRestrictionsRequest()).get());
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                10, 5, TimeUnit.SECONDS);
 
 //
 //        var sched = Executors.newSingleThreadScheduledExecutor();
