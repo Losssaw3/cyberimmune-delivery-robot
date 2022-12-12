@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -12,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 public class MonitoredKafkaConsumerService extends Thread {
 
     private final Set<String> receivedMessageIds;
@@ -48,11 +50,11 @@ public class MonitoredKafkaConsumerService extends Thread {
         if (!message.isValid()) return;
 
         if (!receivedMessageIds.add(message.getRequestId())) {
-            System.out.printf("[RECV] got copy of ID%s\n", message.getRequestId());
+            log.debug("[RECV] got copy of ID{}\n", message.getRequestId());
             return;
         }
 
-        System.out.printf("[RECV] from %s msg: %s\n", message.getSender(), message);
+        log.debug("[RECV] from {} msg: {}\n", message.getSender(), message);
 
         ((ITopicListener<T>) listenerMap.get(topic)).onMessage(message);
     }

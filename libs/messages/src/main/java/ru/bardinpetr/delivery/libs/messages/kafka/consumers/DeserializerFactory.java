@@ -1,6 +1,7 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.FailedDeserializationInfo;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -8,10 +9,13 @@ import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 import java.util.function.Function;
 
+
+@Slf4j
 public class DeserializerFactory {
+
     public static ErrorHandlingDeserializer<MessageRequest> getDeserializer() {
         return getDeserializer(info -> {
-            System.err.printf("Invalid message processed: %s", info);
+            log.error("Invalid message processed: {}", info);
             return new MessageRequest(false);
         });
     }

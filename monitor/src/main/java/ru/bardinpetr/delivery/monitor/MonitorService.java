@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.monitor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.support.serializer.FailedDeserializationInfo;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.DeserializerFactory;
@@ -12,8 +13,9 @@ import ru.bardinpetr.delivery.monitor.validator.IValidator;
 
 import java.util.Map;
 
+@Slf4j
 public class MonitorService {
-    public static final String TOPIC = "monitor";
+
     private final MonitorProducerService producer;
     private final MonitorConsumerService consumer;
 
@@ -35,7 +37,7 @@ public class MonitorService {
     }
 
     private MessageRequest onDeserializeError(FailedDeserializationInfo info) {
-        System.err.printf("Invalid message on topic %s: error %s\n", info.getTopic(), info.getException().toString());
+        log.warn("[MON-ERR] invalid message on topic {} : {}", info.getTopic(), info.getException().toString());
         return null;
     }
 
@@ -56,17 +58,17 @@ public class MonitorService {
             return;
         }
 
-        System.out.printf("Allowed message from %s to %s: %s\n", data.getSender(), data.getRecipient(), data);
+        log.info("[MON-ALLOW] from {} to {}: {}\n", data.getSender(), data.getRecipient(), data);
         producer.sendMessage(data);
     }
 
     private void processInvalid(MessageRequest data) {
-        System.out.printf("Rejected message from %s to %s: %s\n", data.getSender(), data.getRecipient(), data);
+        log.info("[MON-DENY] from {} to {}: {}\n", data.getSender(), data.getRecipient(), data);
     }
 
     public void start() {
-        System.out.println("Started");
         consumer.start();
+        log.debug("[MON] started");
     }
 }
 

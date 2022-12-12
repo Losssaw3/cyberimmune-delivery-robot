@@ -6,6 +6,9 @@ plugins {
 }
 
 dependencies {
+    implementation("org.apache.logging.log4j:log4j-api:2.6.1")
+    implementation("org.apache.logging.log4j:log4j-core:2.6.1")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.6.1")
 }
 
 application {
@@ -26,4 +29,11 @@ docker {
     )
     setDockerfile(file(project.rootProject.file("docker/java.Dockerfile")))
     files(tasks.distZip)
+}
+
+afterEvaluate {
+    copy {
+        from(project.rootProject.file("resources/log4j2.xml"))
+        into(layout.projectDirectory.file("src/main/resources"))
+    }
 }

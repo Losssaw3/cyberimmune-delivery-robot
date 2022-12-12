@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.interfaces.ITopicListener;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class MonitoredKafkaRequesterService extends Thread {
 
     private final ConcurrentMap<String, CompletableFuture<MessageRequest>> futures;
@@ -60,7 +62,7 @@ public class MonitoredKafkaRequesterService extends Thread {
 
     private void onReplyMessage(MessageRequest message) {
         var id = message.getRequestId();
-        System.out.printf("[RS_RECV] ID%s msg %s\n", id, message);
+        log.debug("[RS_RECV] ID:{} msg: {}\n", id, message);
 
         var future = futures.get(id);
         if (future == null)
