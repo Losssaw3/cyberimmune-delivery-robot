@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.motion.hardware;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
@@ -10,6 +11,7 @@ import java.time.Instant;
  * Used to predict current reference position knowing only when speed was changed.
  * Returns position calculated to current time.
  */
+@Slf4j
 public class InternalOdometryController {
 
     private MotorParams motors = new MotorParams(0, 0);
@@ -22,13 +24,17 @@ public class InternalOdometryController {
         var delta = (double) Duration.between(lastUpdateTime, Instant.now()).toMillis() / 1000;
         var speedX = motors.getSpeed() * Math.cos(motors.getDirection());
         var speedY = motors.getSpeed() * Math.sin(motors.getDirection());
-        System.err.printf("%s %s %s %s %s %s %s\n", lastUpdateTime, Instant.now(), delta, speedY, speedX, position.getX() + speedX * delta, position.getY() + speedY * delta);
-        return new Position(position.getX() + speedX * delta, position.getY() + speedY * delta);
+        var deltaPos = new Position(speedX * delta, speedY * delta);
+        var result = position.plus(deltaPos);
+
+        log.debug("Calculated position {}: last {}, delta for time {} -> {},", result, position, delta, deltaPos);
+        return result;
     }
 
     public void update(MotorParams currentTarget) {
         position = getPosition();
         motors = currentTarget;
         lastUpdateTime = Instant.now();
+        log.info("Calculated position before updating motor params: {}", position);
     }
 }

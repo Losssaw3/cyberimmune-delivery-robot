@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.motion;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
@@ -10,8 +11,11 @@ import ru.bardinpetr.delivery.robot.motion.hardware.MotorController;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
 /**
- *
+ * Service for controlling motors.
+ * Provides interface to control throttle and direction.
+ * Automatically calculates
  */
+@Slf4j
 public class MainService {
 
     public static final String SERVICE_NAME = "motion";
@@ -40,6 +44,7 @@ public class MainService {
     }
 
     private void setSpeed(SetSpeedRequest request) {
+        log.info("New target: {}", request);
         motorController.set(new MotorParams(request.getSpeed(), request.getAngle()));
     }
 
@@ -51,16 +56,20 @@ public class MainService {
 
     private void replyWithMotionData(GetMotionDataRequest request) {
         var status = motorController.getCurrentTarget();
+        var pos = motorController.getReferenceIdealPosition();
+        log.info("Sending current state: speed {} angle {} pos {}", status.getSpeed(), status.getDirection(), pos);
+
         producerService.sendReply(request,
                 new GetMotionDataReply(
                         status.getSpeed(),
                         status.getDirection(),
-                        motorController.getReferenceIdealPosition()
+                        pos
                 )
         );
     }
 
     public void start() {
         consumerService.start();
+        log.info("Started");
     }
 }

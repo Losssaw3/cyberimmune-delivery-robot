@@ -37,7 +37,7 @@ public class MonitorService {
     }
 
     private MessageRequest onDeserializeError(FailedDeserializationInfo info) {
-        log.warn("[MON-ERR] invalid message on topic {} : {}", info.getTopic(), info.getException().toString());
+        log.warn("[MON-ERR] invalid message on topic {} : {}", info.getTopic(), info.getException());
         return null;
     }
 
@@ -58,12 +58,12 @@ public class MonitorService {
             return;
         }
 
-        log.info("[MON-ALLOW] from {} to {}: {}\n", data.getSender(), data.getRecipient(), data);
+        log.info("[MON-ALLOW] from {} to {}: {}", data.getSender(), data.getRecipient(), data);
         producer.sendMessage(data);
     }
 
     private void processInvalid(MessageRequest data) {
-        log.info("[MON-DENY] from {} to {}: {}\n", data.getSender(), data.getRecipient(), data);
+        log.info("[MON-DENY] from {} to {}: {}", data.getSender(), data.getRecipient(), data);
     }
 
     public void start() {

@@ -62,7 +62,7 @@ public class MonitoredKafkaRequesterService extends Thread {
 
     private void onReplyMessage(MessageRequest message) {
         var id = message.getRequestId();
-        log.debug("[RS_RECV] ID:{} msg: {}\n", id, message);
+        log.debug("[RS_RECV] ID:{} msg: {}", id, message);
 
         var future = futures.get(id);
         if (future == null)

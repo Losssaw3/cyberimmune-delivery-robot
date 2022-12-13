@@ -1,8 +1,10 @@
 package ru.bardinpetr.delivery.robot.motion.hardware;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
+@Slf4j
 public class MotorController {
     private final InternalOdometryController odometryController;
     private final MotorRestrictions restrictions;
@@ -17,6 +19,7 @@ public class MotorController {
         currentTarget = restrictions.apply(params);
         odometryController.update(currentTarget);
         // send commands to motors
+        log.warn("Sending to hardware: {}", params);
     }
 
     public MotorRestrictions getRestrictions() {

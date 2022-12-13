@@ -50,11 +50,11 @@ public class MonitoredKafkaConsumerService extends Thread {
         if (!message.isValid()) return;
 
         if (!receivedMessageIds.add(message.getRequestId())) {
-            log.debug("[RECV] got copy of ID{}\n", message.getRequestId());
+            log.debug("[RECV] got copy of ID{}", message.getRequestId());
             return;
         }
 
-        log.debug("[RECV] from {} msg: {}\n", message.getSender(), message);
+        log.debug("[RECV] from {} msg: {}", message.getSender(), message);
 
         ((ITopicListener<T>) listenerMap.get(topic)).onMessage(message);
     }

@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.locker;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
@@ -10,6 +11,7 @@ import ru.bardinpetr.delivery.robot.locker.hardware.LockerController;
  * Service for controlling locker hardware.
  * Allows to open locker for specific time via LockerOpenRequest
  */
+@Slf4j
 public class MainService {
 
     public static final String SERVICE_NAME = "locker";
@@ -33,5 +35,6 @@ public class MainService {
 
     public void start() {
         consumerService.start();
+        log.info("Started");
     }
 }

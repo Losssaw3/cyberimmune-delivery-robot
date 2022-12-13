@@ -1,8 +1,11 @@
 package ru.bardinpetr.delivery.robot.locker.hardware;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class LockerController {
     volatile private boolean isOpened = false;
 
@@ -27,7 +30,7 @@ public class LockerController {
      */
     private void setLockerStatus(boolean locked) {
         isOpened = locked;
-
+        log.warn("Locker status set to {}", locked);
     }
 
 }

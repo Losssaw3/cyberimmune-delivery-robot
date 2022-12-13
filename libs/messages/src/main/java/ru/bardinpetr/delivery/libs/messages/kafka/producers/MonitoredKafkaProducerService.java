@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.ReplyableMessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -31,7 +32,7 @@ public class MonitoredKafkaProducerService {
         if (request.getRecipient().isEmpty() || request.getSender().isEmpty() || request.getRequestId().isEmpty())
             throw new IllegalArgumentException("Message must have sender and destination");
 
-        log.debug("[SEND] to {} msg {}\n", request.getRecipient(), request);
+        log.debug("[SEND] to {} msg {}", request.getRecipient(), request);
         try {
             kafkaTemplate.send(
                             MONITOR_TOPIC,
@@ -56,6 +57,10 @@ public class MonitoredKafkaProducerService {
         request.setSender(senderName);
         request.setRecipient(recipient);
         return sendMessage(request);
+    }
+
+    public String sendMessage(Units recipient, MessageRequest request) {
+        return sendMessage(recipient.toString(), request);
     }
 
     /**

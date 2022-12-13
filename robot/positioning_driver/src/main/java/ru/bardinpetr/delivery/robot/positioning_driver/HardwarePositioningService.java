@@ -39,13 +39,16 @@ public class HardwarePositioningService {
     }
 
     private void replyPosition(PositionRequest request) {
+        var pos = positionService.getCurrentPosition();
+        if (pos == null) return;
         producerService.sendReply(request,
                 new PositionReply(
-                        positionService.getCurrentPosition(), 1
+                        pos, 1
                 ));
     }
 
     public void start() {
+        positionService.start();
         consumerService.start();
     }
 }

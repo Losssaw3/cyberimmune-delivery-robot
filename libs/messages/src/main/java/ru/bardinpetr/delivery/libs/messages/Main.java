@@ -5,8 +5,9 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataReply;
-import ru.bardinpetr.delivery.libs.messages.msg.motion.GetRestrictionsReply;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
+import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.motion.SetSpeedRequest;
 
 import java.util.HashMap;
@@ -38,22 +39,23 @@ public class Main {
 
         var rep = new MonitoredKafkaRequesterService(
                 "test",
-                List.of(GetRestrictionsReply.class, GetMotionDataReply.class),
+                List.of(PositionReply.class),
                 producerFactory,
                 kafkaConsumerFactory
         );
 
         rep.start();
 
-//        Thread.sleep(15000);
         System.out.println("started");
 
-//        System.out.println(rep.request("motion", new GetRestrictionsRequest()).get());
-//        System.err.println(rep.request("motion", new GetMotionDataRequest()).get());
-//        Thread.sleep(500);
-//
-        producer.sendMessage("motion", new SetSpeedRequest(10, Math.PI / 4));
-//
+        producer.sendMessage(Units.MOTION, new SetSpeedRequest(1, 0));
+        Thread.sleep(5000);
+
+        System.out.println(
+                rep.request(Units.POS_ODOM.toString(),
+                        new PositionRequest()).get()
+        );
+
 //        Thread.sleep(5000);
 //        System.err.println(rep.request("motion", new GetMotionDataRequest()).get());
 //        producer.sendMessage("motion", new SetSpeedRequest(-2, Math.PI/4));
