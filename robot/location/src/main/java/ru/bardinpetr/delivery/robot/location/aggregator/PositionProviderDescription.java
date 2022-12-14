@@ -27,22 +27,31 @@ public class PositionProviderDescription {
      * Stores new position
      *
      * @param position new position
-     * @return average speed between this point and last stored point
      */
-    public double addPosition(Position position) {
+    public void addPosition(Position position) {
         positions.add(position);
         if (positions.size() > MAX_STORED_COUNT) positions.remove();
-
-        if (lastPosition != null) {
-            double positionDelta = lastPosition.distance(position);
-            long timeDelta = position.getTimestampSeconds() - lastPosition.getTimestampSeconds();
-            return positionDelta / timeDelta;
-        }
         lastPosition = position;
-        return 0;
+    }
+
+    /**
+     * @return average speed between this point and last stored point
+     */
+    public double getLastSegmentSpeed(Position position) {
+        if (lastPosition == null) return 0;
+        double positionDelta = lastPosition.distance(position);
+        return positionDelta / getAge(position);
+    }
+
+    public long getAge(Position position) {
+        return position.getTimestampSeconds() - lastPosition.getTimestampSeconds();
     }
 
     public void setTampered() {
         tampered = true;
+    }
+
+    public boolean isActive() {
+        return lastPosition != null;
     }
 }

@@ -8,7 +8,6 @@ import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProduc
 import ru.bardinpetr.delivery.libs.messages.msg.Units;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.motion.SetSpeedRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,14 +46,22 @@ public class Main {
         rep.start();
 
         System.out.println("started");
-
-        producer.sendMessage(Units.MOTION, new SetSpeedRequest(1, 0));
-        Thread.sleep(5000);
-
+//        producer.sendMessage(Units.MOTION, new SetSpeedRequest(1, 0));
+//        Thread.sleep(10000);
+//
         System.out.println(
-                rep.request(Units.POS_ODOM.toString(),
+                rep.request(Units.LOC.toString(),
                         new PositionRequest()).get()
         );
+//        Thread.sleep(1000);
+//
+//        producer.sendMessage(Units.MOTION, new SetSpeedRequest(2.3, 0));
+//        Thread.sleep(1000);
+//
+//        System.out.println(
+//                rep.request(Units.LOC.toString(),
+//                        new PositionRequest()).get()
+//        );
 
 //        Thread.sleep(5000);
 //        System.err.println(rep.request("motion", new GetMotionDataRequest()).get());

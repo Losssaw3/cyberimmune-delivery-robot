@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.location;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * An aggregator for multiple hardware positioning drivers.
  */
+@Slf4j
 public class MainService {
 
     private final MonitoredKafkaConsumerService consumerService;
@@ -27,6 +29,8 @@ public class MainService {
 
     private final MonitoredKafkaRequesterService requesterService;
     private final PositionAggregator aggregator;
+    private final int updateIntervalSeconds;
+    private final List<String> aggregatedServices;
 
     public MainService(MonitoredKafkaConsumerFactory consumerFactory,
                        MonitoredKafkaProducerFactory producerFactory,
@@ -34,6 +38,8 @@ public class MainService {
                        PositionAggregator aggregator,
                        int updateIntervalSeconds) {
         this.aggregator = aggregator;
+        this.updateIntervalSeconds = updateIntervalSeconds;
+        this.aggregatedServices = aggregatedServices;
 
         consumerService = new MonitoredKafkaConsumerServiceBuilder(Units.LOC.toString())
                 .setConsumerFactory(consumerFactory)
@@ -53,36 +59,48 @@ public class MainService {
         );
 
         var executor = Executors.newSingleThreadScheduledExecutor();
-
-        aggregatedServices.forEach(
-                serviceName -> executor
-                        .scheduleWithFixedDelay(
-                                () -> updateService(serviceName),
-                                60,
-                                updateIntervalSeconds,
-                                TimeUnit.SECONDS
-                        )
+        executor.scheduleWithFixedDelay(
+                this::updateAll,
+                updateIntervalSeconds,
+                updateIntervalSeconds,
+                TimeUnit.SECONDS
         );
+    }
+
+    private void updateAll() {
+        aggregatedServices.forEach(this::updateService);
     }
 
     private void updateService(String service) {
         try {
+            log.debug("Updating {}...", service);
             var res = (PositionReply)
                     requesterService
                             .request(service, new PositionRequest())
-                            .get(30, TimeUnit.SECONDS);
-
+                            .get(updateIntervalSeconds / 2, TimeUnit.SECONDS);
+            log.debug("Got {} from {}", res.getPosition(), service);
             aggregator.update(service, res.getPosition(), res.getAccuracy());
+            log.debug("Updating {} finished", service);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.warn("Service {} is not responding {}", service, e);
         }
     }
 
     private void positionRequest(PositionRequest request) {
+        log.debug("Got position request");
+        var lastTime = aggregator.positionAge();
+        if (lastTime > updateIntervalSeconds / 5) {
+            log.info("Going to update position as it is by {} seconds in past", lastTime);
+            updateAll();
+        }
+
+        var providers = aggregator.getValidProviders();
+        log.debug("Calculated position via {}", providers);
         producerService.sendReply(
                 request,
                 new PositionReply(
                         aggregator.getAveragePosition(),
-                        aggregator.getValidProviders().size()
+                        providers.size()
                 )
         );
     }
@@ -90,5 +108,6 @@ public class MainService {
     public void start() {
         requesterService.start();
         consumerService.start();
+        log.info("Started");
     }
 }
