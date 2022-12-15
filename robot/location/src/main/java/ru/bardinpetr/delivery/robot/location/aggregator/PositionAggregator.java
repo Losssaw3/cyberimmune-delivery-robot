@@ -16,7 +16,7 @@ import java.util.Map;
  */
 @Slf4j
 public class PositionAggregator {
-
+    private final static double SPEED_TOLERANCE = 1 + 0.3;
 
     private final Map<String, PositionProviderDescription> providers = new HashMap<>();
     private Position lastBeforeAllTampered = new Position();
@@ -25,7 +25,7 @@ public class PositionAggregator {
 
 
     public PositionAggregator(double maxSpeedTamperedTrigger, double positionDifferenceTamperedTrigger) {
-        this.maxSpeedTrigger = maxSpeedTamperedTrigger;
+        this.maxSpeedTrigger = maxSpeedTamperedTrigger * SPEED_TOLERANCE;
         this.positionDifferenceTamperedTrigger = positionDifferenceTamperedTrigger;
     }
 

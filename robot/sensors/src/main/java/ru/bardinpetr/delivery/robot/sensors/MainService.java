@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.sensors;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
@@ -15,6 +16,7 @@ import ru.bardinpetr.delivery.robot.sensors.hardware.PositioningHumanDetector;
  * The main purpose is to detect human when robot arrived.
  * Detectors are pluggable with IHumanDetector
  */
+@Slf4j
 public class MainService {
 
     public static final String SERVICE_NAME = "sensors";
@@ -39,17 +41,21 @@ public class MainService {
         );
 
         this.detector = detector;
-        this.detector.setCallback(() ->
-                producerService.sendMessage(Units.CCU.toString(), new HumanDetectedRequest())
+        this.detector.setCallback(() -> {
+                    log.info("Human detected");
+                    producerService.sendMessage(Units.CCU.toString(), new HumanDetectedRequest());
+                }
         );
     }
 
     private void onConfig(HumanDetectionConfigRequest request) {
+        log.info("Set configuration: {} D{}", request.getLocation(), request.getAccuracy());
         detector.config(request);
     }
 
     public void start() {
         detector.start();
         consumerService.start();
+        log.info("Started");
     }
 }

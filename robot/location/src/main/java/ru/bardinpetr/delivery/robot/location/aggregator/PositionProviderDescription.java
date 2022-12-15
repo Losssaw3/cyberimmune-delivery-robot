@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.ToString;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 
+import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -29,6 +30,7 @@ public class PositionProviderDescription {
      * @param position new position
      */
     public void addPosition(Position position) {
+        position.setTimestampSeconds(Instant.now().getEpochSecond());
         positions.add(position);
         if (positions.size() > MAX_STORED_COUNT) positions.remove();
         lastPosition = position;

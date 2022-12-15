@@ -10,7 +10,6 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Position {
     private double x = 0;
     private double y = 0;

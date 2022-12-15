@@ -6,6 +6,9 @@
         </Console>
     </Appenders>
     <Loggers>
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+        </Root>
         <Logger name="ru.bardinpetr.delivery" level="DEBUG">
             <AppenderRef ref="Console"/>
         </Logger>

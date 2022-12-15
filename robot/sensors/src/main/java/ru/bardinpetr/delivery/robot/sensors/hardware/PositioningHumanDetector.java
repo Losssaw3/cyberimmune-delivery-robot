@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.sensors.hardware;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
@@ -12,6 +13,7 @@ import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequ
 import java.util.List;
 import java.util.concurrent.*;
 
+@Slf4j
 public class PositioningHumanDetector extends Thread implements IHumanDetector {
 
     private final ScheduledExecutorService executorService;
@@ -48,12 +50,15 @@ public class PositioningHumanDetector extends Thread implements IHumanDetector {
     private void check() {
         if (callback == null) return;
 
+        log.info("Checking location...");
         try {
             var reply =
                     (PositionReply) kafka
                             .request(Units.LOC.toString(), new PositionRequest())
                             .get(60, TimeUnit.SECONDS);
-            if (reply.getPosition().distance(targetLocation) < accuracy)
+            var dist = reply.getPosition().distance(targetLocation);
+            log.info("Got distance {}", dist);
+            if (dist < accuracy)
                 callback.run();
         } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
         }

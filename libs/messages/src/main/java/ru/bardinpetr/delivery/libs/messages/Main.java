@@ -6,8 +6,10 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaReques
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
 import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
-import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.motion.SetSpeedRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +22,8 @@ public class Main {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Map<String, Object> configs = new HashMap<>();
-        configs.put("bootstrap.servers", "localhost:9092");
+//        configs.put("bootstrap.servers", "localhost:9092");
+        configs.put("bootstrap.servers", "82.209.92.89:9092");
         configs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         configs.put(ConsumerConfig.GROUP_ID_CONFIG, "test-unit");
 
@@ -46,13 +49,17 @@ public class Main {
         rep.start();
 
         System.out.println("started");
+
+        producer.sendMessage(Units.MOTION, new SetSpeedRequest(5, 0));
+        producer.sendMessage(Units.SENSORS, new HumanDetectionConfigRequest(new Position(100, 0), 50));
+
 //        producer.sendMessage(Units.MOTION, new SetSpeedRequest(1, 0));
 //        Thread.sleep(10000);
 //
-        System.out.println(
-                rep.request(Units.LOC.toString(),
-                        new PositionRequest()).get()
-        );
+//        System.out.println(
+//                rep.request(Units.LOC.toString(),
+//                        new PositionRequest()).get()
+//        );
 //        Thread.sleep(1000);
 //
 //        producer.sendMessage(Units.MOTION, new SetSpeedRequest(2.3, 0));
