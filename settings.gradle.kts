@@ -17,4 +17,6 @@ include(
     "robot:positioning_driver",
     "robot:odometer",
     "robot:location",
+    "robot:central",
+    "robot:communication",
 )

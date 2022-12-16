@@ -28,11 +28,11 @@ public class Main {
                 props.getProperty("keystore_path"),
                 props.getProperty("keystore_pass")
         );
-        var sign = new SignatureCryptoService();
+        var sign = new SignatureCryptoService(key);
 
 
         var task = new Task("1", "1", "");
-        task.setAddressSignature(sign.sign(key, task.getAddress()));
+        task.setAddressSignature(sign.sign(task.getAddress()));
 
         String data = (new ObjectMapper()).writeValueAsString(task);
 

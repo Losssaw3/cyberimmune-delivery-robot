@@ -11,6 +11,18 @@ public class SignatureCryptoService {
 
     public static final int KEY_SIZE = 2048;
     private static final String ALGO = "SHA512withRSA";
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
+
+    public SignatureCryptoService(PrivateKey key) {
+        privateKey = key;
+        publicKey = null;
+    }
+
+    public SignatureCryptoService(PublicKey key) {
+        privateKey = null;
+        publicKey = key;
+    }
 
     public static KeyPair generate() {
         KeyPairGenerator generator = null;
@@ -23,6 +35,10 @@ public class SignatureCryptoService {
         return generator.generateKeyPair();
     }
 
+    public static byte[] decodeSign(String sign) {
+        return Base64.getDecoder().decode(sign);
+    }
+
     private Signature getSignatureAlgo() {
         try {
             return Signature.getInstance(ALGO);
@@ -31,15 +47,14 @@ public class SignatureCryptoService {
         }
     }
 
-    public static byte[] decodeSign(String sign) {
-        return Base64.getDecoder().decode(sign);
-    }
+    public String sign(String data) {
+        if (privateKey == null)
+            throw new RuntimeException("No key");
 
-    public String sign(PrivateKey key, String data) {
         var algo = getSignatureAlgo();
         byte[] sign;
         try {
-            algo.initSign(key);
+            algo.initSign(privateKey);
             algo.update(data.getBytes());
             sign = algo.sign();
         } catch (SignatureException | InvalidKeyException e) {
@@ -48,10 +63,17 @@ public class SignatureCryptoService {
         return Base64.getEncoder().encodeToString(sign);
     }
 
-    public boolean verify(PublicKey key, String data, byte[] signature) {
+    public boolean verify(String data, String signature) {
+        return verify(data, decodeSign(signature));
+    }
+
+    public boolean verify(String data, byte[] signature) {
+        if (privateKey == null)
+            throw new RuntimeException("No key");
+
         var algo = getSignatureAlgo();
         try {
-            algo.initVerify(key);
+            algo.initVerify(publicKey);
             algo.update(data.getBytes());
             return algo.verify(signature);
         } catch (SignatureException | InvalidKeyException e) {
