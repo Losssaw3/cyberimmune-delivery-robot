@@ -59,9 +59,9 @@ public class MainService {
         );
 
         var executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleWithFixedDelay(
+        executor.schedule(
                 this::updateAll,
-                updateIntervalSeconds,
+//                updateIntervalSeconds,
                 updateIntervalSeconds,
                 TimeUnit.SECONDS
         );
@@ -88,11 +88,12 @@ public class MainService {
 
     private void positionRequest(PositionRequest request) {
         log.debug("Got position request");
-        var lastTime = aggregator.positionAge();
-        if (lastTime > updateIntervalSeconds / 5) {
-            log.info("Going to update position as it is by {} seconds in past", lastTime);
-            updateAll();
-        }
+//        var lastTime = aggregator.positionAge();
+//        if (lastTime > updateIntervalSeconds / 5) {
+//            log.info("Going to update position as it is by {} seconds in past", lastTime);
+//        }
+
+        updateAll();
 
         var providers = aggregator.getValidProviders();
         log.debug("Calculated position via {}", providers);

@@ -2,8 +2,6 @@ package ru.bardinpetr.delivery.robot.central.services;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
@@ -23,7 +21,6 @@ public class NavService {
     private static final int UPDATE_INTERVAL_SEC = 1;
     private static final double POSITION_COMPARISON_THRESHOLD = 10;
 
-    private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
     private final MonitoredKafkaRequesterService requesterService;
 
@@ -36,10 +33,6 @@ public class NavService {
 
     public NavService(MonitoredKafkaConsumerFactory consumerFactory,
                       MonitoredKafkaProducerFactory producerFactory) {
-        consumerService = new MonitoredKafkaConsumerServiceBuilder(SERVICE_NAME)
-                .setConsumerFactory(consumerFactory)
-                .build();
-
         producerService = new MonitoredKafkaProducerService(
                 SERVICE_NAME,
                 producerFactory
@@ -69,6 +62,7 @@ public class NavService {
                             setMotors(0, 0);
                             return;
                         }
+                        log.debug("Current: {}; target: {}", position, target);
 
                         var angle = position.directionTo(target);
                         var distance = position.distance(target);
@@ -129,7 +123,7 @@ public class NavService {
     }
 
     public void start() {
-        consumerService.start();
+//        consumerService.start();
         requesterService.start();
         log.info("Navigation started");
     }

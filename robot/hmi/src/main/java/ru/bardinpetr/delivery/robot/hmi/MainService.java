@@ -5,6 +5,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
 import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINValidationResponse;
 import ru.bardinpetr.delivery.robot.hmi.interactors.IUserInteractor;
@@ -15,8 +16,6 @@ import java.time.LocalTime;
  * Provides a user interface to enter PIN code. Sends PIN code to central control unit.
  */
 public class MainService {
-
-    public static final String SERVICE_NAME = "hmi";
 
     public static final int MAX_TRY_COUNT = 3;
     public static final int RETRY_DELAY_SEC = 5;
@@ -32,13 +31,13 @@ public class MainService {
                        IUserInteractor userInterface) {
         this.userInterface = userInterface;
 
-        consumerService = new MonitoredKafkaConsumerServiceBuilder(SERVICE_NAME)
+        consumerService = new MonitoredKafkaConsumerServiceBuilder(Units.HMI.toString())
                 .setConsumerFactory(consumerFactory)
                 .subscribe(PINValidationResponse.class, this::onRequest)
                 .build();
 
         producerService = new MonitoredKafkaProducerService(
-                SERVICE_NAME,
+                Units.HMI.toString(),
                 producerFactory
         );
     }
@@ -66,7 +65,7 @@ public class MainService {
     }
 
     private boolean verify(String pin) {
-        producerService.sendMessage("central", new PINEnterRequest(pin));
+        producerService.sendMessage(Units.CCU, new PINEnterRequest(pin));
         return true;
     }
 

@@ -7,9 +7,11 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
 import ru.bardinpetr.delivery.libs.messages.msg.Units;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatus;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatusRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.NewTaskRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.ccu.*;
+import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectedRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 import ru.bardinpetr.delivery.robot.central.services.NavService;
 import ru.bardinpetr.delivery.robot.central.services.crypto.CoreCryptoService;
 
@@ -25,6 +27,9 @@ public class MainService {
     private final NavService navService;
 
     private DeliveryStatus currentStatus = DeliveryStatus.IDLE;
+    private boolean isHumanDetected = false;
+    private DeliveryTask currentTask;
+
 
     public MainService(MonitoredKafkaConsumerFactory consumerFactory,
                        MonitoredKafkaProducerFactory producerFactory,
@@ -35,12 +40,21 @@ public class MainService {
         consumerService = new MonitoredKafkaConsumerServiceBuilder(SERVICE_NAME)
                 .setConsumerFactory(consumerFactory)
                 .subscribe(NewTaskRequest.class, this::onNewTask)
+                .subscribe(PINEnterRequest.class, this::onPinEntered)
+                .subscribe(
+                        HumanDetectedRequest.class,
+                        msg -> setHumanDetected(currentStatus == DeliveryStatus.ARRIVED_TO_CUSTOMER || isHumanDetected)
+                )
                 .build();
 
         producerService = new MonitoredKafkaProducerService(
                 SERVICE_NAME,
                 producerFactory
         );
+
+        var t = new InputDeliveryTask("XPwjzZNxX9wlQ0hChx4vgDNkM8Bf3As/Nkr40Y/pG3ZEy15dkc+vxikUZ9c/E8lxk4jFiR986MPR8xmvHYPnD4JQFaTmuUP2HF6PIEyOzI1kEjcvP4RRRBc6Tqhtw/h/ATRk0IzuuMEvwiSzhpuOMkhh6o9gK9Ri+6dCcqApXDMmEZ2rIfnH3UMGjxBdretUUI7lK/kuMY96gOwyOanxS6ydY+36lwp4JYTngKGG+7jhdcn/neFlxZ/FttroPuH2d0vXW8s8Jf/K4boB1zgD7mC6MNgLfCj+vhJUx6XfYHBlvt9NcoMK0mATDo3LG4ms//pfzmlIX+Ozl4hRRrznOA==",
+                new DeliveryTask(new Position(100.0, 200.0), "K7cnHXi1JYHebm7Taalf6wAAAAFJPp2UcDJtoa912uzIbAyD"));
+        onNewTask(new NewTaskRequest(t));
     }
 
     private void onNewTask(NewTaskRequest request) {
@@ -60,18 +74,36 @@ public class MainService {
         currentStatus = DeliveryStatus.RUNNING;
         replyStatus("OK", DeliveryStatus.RUNNING);
 
+        currentTask = task;
+
         log.info("Initiating navigation to {}", task.getPosition());
         navService.setTarget(task.getPosition());
         navService.run(this::onArrived);
+
+        producerService.sendMessage(
+                Units.SENSORS,
+                new HumanDetectionConfigRequest(task.getPosition(), 20)
+        );
     }
 
     private void onArrived() {
         currentStatus = DeliveryStatus.ARRIVED_TO_CUSTOMER;
         log.info("Arrived at destination");
-
-        
     }
 
+    private void onPinEntered(PINEnterRequest request) {
+        if (currentStatus != DeliveryStatus.ARRIVED_TO_CUSTOMER || !isHumanDetected)
+            return;
+
+        var pin = request.getPin();
+        log.info("Got PIN: {}", pin);
+
+        if (!pin.equals(currentTask.getPin())) {
+            log.error("Invalid PIN");
+        }
+
+
+    }
 
     private void replyStatus(String text, DeliveryStatus status) {
         producerService.sendMessage(
@@ -80,9 +112,15 @@ public class MainService {
         );
     }
 
+    private void setHumanDetected(boolean state) {
+        if (isHumanDetected == state) return;
+        log.info("Human detection state changed to {}", state);
+        isHumanDetected = state;
+    }
+
     public void start() {
+        log.info("Started");
         consumerService.start();
         navService.start();
-        log.info("Started");
     }
 }

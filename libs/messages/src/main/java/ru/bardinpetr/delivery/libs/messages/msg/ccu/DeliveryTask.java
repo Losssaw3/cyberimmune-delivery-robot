@@ -19,6 +19,6 @@ public class DeliveryTask {
      * @return string representation of components to sign
      */
     public String toSignString() {
-        return position.toString();
+        return "%s#%s".formatted(position.getX(), position.getY());
     }
 }

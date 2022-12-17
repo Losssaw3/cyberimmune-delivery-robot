@@ -42,7 +42,7 @@ public class PositionProviderDescription {
     public double getLastSegmentSpeed(Position position) {
         if (lastPosition == null) return 0;
         double positionDelta = lastPosition.distance(position);
-        return positionDelta / getAge(position);
+        return positionDelta / (-lastPosition.getTimestampSeconds());
     }
 
     public long getAge(Position position) {

@@ -68,7 +68,7 @@ public class SignatureCryptoService {
     }
 
     public boolean verify(String data, byte[] signature) {
-        if (privateKey == null)
+        if (publicKey == null)
             throw new RuntimeException("No key");
 
         var algo = getSignatureAlgo();

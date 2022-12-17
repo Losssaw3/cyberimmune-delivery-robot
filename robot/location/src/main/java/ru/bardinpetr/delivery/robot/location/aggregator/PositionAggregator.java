@@ -34,6 +34,7 @@ public class PositionAggregator {
             providers.put(name, new PositionProviderDescription(name));
         var service = providers.get(name);
 
+        newPosition.setTimestampSeconds(Instant.now().getEpochSecond());
         var speed = service.getLastSegmentSpeed(newPosition);
 
         log.info("Recorded position from {} -> {}", name, newPosition);

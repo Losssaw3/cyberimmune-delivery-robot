@@ -65,8 +65,10 @@ public class MonitoredKafkaRequesterService extends Thread {
         log.debug("[RS_RECV] ID:{} msg: {}", id, message);
 
         var future = futures.get(id);
-        if (future == null)
-            throw new RuntimeException("Got message with invalid identifier. Could not find listener");
+        if (future == null) {
+            log.error("Got message with invalid identifier {}. Could not find listener", id);
+            return;
+        }
 
         if (!message.isValid())
             future.completeExceptionally(new RuntimeException("message invalid"));
