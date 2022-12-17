@@ -2,9 +2,8 @@ package ru.bardinpetr.delivery.monitor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.support.serializer.FailedDeserializationInfo;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.DeserializerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.libs.messages.kafka.deserializers.MonitoredDeserializer;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.monitor.kafka.MonitorConsumerService;
@@ -28,7 +27,7 @@ public class MonitorService {
                 new MonitoredKafkaProducerFactory(kafkaConfig)
         );
 
-        var deserializer = DeserializerFactory.getDeserializer(this::onDeserializeError);
+        var deserializer = new MonitoredDeserializer(this::onDeserializeError);
 
         var consumerFactory = new MonitoredKafkaConsumerFactory(
                 kafkaConfig, deserializer
@@ -36,8 +35,8 @@ public class MonitorService {
         consumer = new MonitorConsumerService(consumerFactory, this::onMessage);
     }
 
-    private MessageRequest onDeserializeError(FailedDeserializationInfo info) {
-        log.warn("[MON-ERR] invalid message on topic {} : {}", info.getTopic(), info.getException());
+    private MessageRequest onDeserializeError(String topic, Exception ex) {
+        log.warn("[MON-ERR] invalid message on topic {} : {}", topic, ex);
         return null;
     }
 

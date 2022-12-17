@@ -3,11 +3,10 @@ package ru.bardinpetr.delivery.libs.messages.kafka.consumers;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import ru.bardinpetr.delivery.libs.messages.kafka.deserializers.MonitoredDeserializer;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 import java.util.Map;
-
-import static ru.bardinpetr.delivery.libs.messages.kafka.consumers.DeserializerFactory.getDeserializer;
 
 public class MonitoredKafkaConsumerFactory extends DefaultKafkaConsumerFactory<String, MessageRequest> {
 
@@ -23,7 +22,7 @@ public class MonitoredKafkaConsumerFactory extends DefaultKafkaConsumerFactory<S
         super(
                 configs,
                 new StringDeserializer(),
-                getDeserializer());
+                new MonitoredDeserializer());
     }
 
 }
