@@ -10,6 +10,8 @@ import ru.bardinpetr.delivery.libs.messages.msg.Units;
 import ru.bardinpetr.delivery.libs.messages.msg.ccu.*;
 import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerDoorClosedRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerOpenRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectedRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 import ru.bardinpetr.delivery.robot.central.services.NavService;
@@ -30,6 +32,8 @@ public class MainService {
     private boolean isHumanDetected = false;
     private DeliveryTask currentTask;
 
+    private final Position home;
+
 
     public MainService(MonitoredKafkaConsumerFactory consumerFactory,
                        MonitoredKafkaProducerFactory producerFactory,
@@ -41,6 +45,7 @@ public class MainService {
                 .setConsumerFactory(consumerFactory)
                 .subscribe(NewTaskRequest.class, this::onNewTask)
                 .subscribe(PINEnterRequest.class, this::onPinEntered)
+                .subscribe(LockerDoorClosedRequest.class, this::onStartReturnHome)
                 .subscribe(
                         HumanDetectedRequest.class,
                         msg -> setHumanDetected(currentStatus == DeliveryStatus.ARRIVED_TO_CUSTOMER || isHumanDetected)
@@ -51,6 +56,8 @@ public class MainService {
                 SERVICE_NAME,
                 producerFactory
         );
+
+        home = new Position(0, 0);
 
         var t = new InputDeliveryTask("XPwjzZNxX9wlQ0hChx4vgDNkM8Bf3As/Nkr40Y/pG3ZEy15dkc+vxikUZ9c/E8lxk4jFiR986MPR8xmvHYPnD4JQFaTmuUP2HF6PIEyOzI1kEjcvP4RRRBc6Tqhtw/h/ATRk0IzuuMEvwiSzhpuOMkhh6o9gK9Ri+6dCcqApXDMmEZ2rIfnH3UMGjxBdretUUI7lK/kuMY96gOwyOanxS6ydY+36lwp4JYTngKGG+7jhdcn/neFlxZ/FttroPuH2d0vXW8s8Jf/K4boB1zgD7mC6MNgLfCj+vhJUx6XfYHBlvt9NcoMK0mATDo3LG4ms//pfzmlIX+Ozl4hRRrznOA==",
                 new DeliveryTask(new Position(100.0, 200.0), "K7cnHXi1JYHebm7Taalf6wAAAAFJPp2UcDJtoa912uzIbAyD"));
@@ -102,7 +109,24 @@ public class MainService {
             log.error("Invalid PIN");
         }
 
+        log.info("Opening locker...");
+        producerService.sendMessage(
+                Units.LOCKER,
+                new LockerOpenRequest()
+        );
+    }
 
+    private void onStartReturnHome(LockerDoorClosedRequest request) {
+        log.info("Locker closed. Returning home");
+        currentStatus = DeliveryStatus.RETURNING;
+
+        navService.setTarget(home);
+        navService.run(() -> {
+            log.info("Returned successfully");
+
+            currentStatus = DeliveryStatus.IDLE;
+            replyStatus("Finished", DeliveryStatus.ENDED_OK);
+        });
     }
 
     private void replyStatus(String text, DeliveryStatus status) {

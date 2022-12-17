@@ -16,6 +16,7 @@ import java.time.LocalTime;
  * Provides a user interface to enter PIN code. Sends PIN code to central control unit.
  */
 public class MainService {
+    public static final String SERVICE_NAME = Units.HMI.toString();
 
     public static final int MAX_TRY_COUNT = 3;
     public static final int RETRY_DELAY_SEC = 5;
@@ -31,13 +32,13 @@ public class MainService {
                        IUserInteractor userInterface) {
         this.userInterface = userInterface;
 
-        consumerService = new MonitoredKafkaConsumerServiceBuilder(Units.HMI.toString())
+        consumerService = new MonitoredKafkaConsumerServiceBuilder(SERVICE_NAME)
                 .setConsumerFactory(consumerFactory)
                 .subscribe(PINValidationResponse.class, this::onRequest)
                 .build();
 
         producerService = new MonitoredKafkaProducerService(
-                Units.HMI.toString(),
+                SERVICE_NAME,
                 producerFactory
         );
     }

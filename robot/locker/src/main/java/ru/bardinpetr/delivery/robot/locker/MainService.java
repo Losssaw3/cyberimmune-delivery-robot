@@ -18,7 +18,7 @@ import ru.bardinpetr.delivery.robot.locker.hardware.LockerController;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = "locker";
+    public static final String SERVICE_NAME = Units.LOCKER.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;

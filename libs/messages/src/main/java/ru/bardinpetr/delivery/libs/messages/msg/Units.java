@@ -2,15 +2,15 @@ package ru.bardinpetr.delivery.libs.messages.msg;
 
 public enum Units {
     CCU("central"),
-    FMS("fleet_manager"),
-    AUTH("authentication"),
-    COMM("robot_communication"),
+    FMS("fms"),
+    AUTH("auth"),
+    COMM("comms"),
     HMI("hmi"),
     LOCKER("locker"),
     LOC("location"),
     MOTION("motion"),
     SENSORS("sensors"),
-    POS_ODOM("odometer_driver");
+    POS_ODOM("odom");
 
     private final String name;
 

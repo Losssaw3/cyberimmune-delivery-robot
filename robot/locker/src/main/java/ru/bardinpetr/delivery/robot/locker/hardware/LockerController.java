@@ -21,6 +21,8 @@ public class LockerController {
 
         setLockerStatus(true);
         executor.schedule(() -> setLockerStatus(false), timeSec, TimeUnit.SECONDS);
+
+        // This is only for demonstration. There should be real sensor
         executor.schedule(onDoorClosed, timeSec * 2L, TimeUnit.SECONDS);
     }
 
@@ -32,6 +34,7 @@ public class LockerController {
     private void setLockerStatus(boolean locked) {
         isOpened = locked;
         log.warn("Locker status set to {}", locked);
-    }
 
+        // Hardware controlling goes here...
+    }
 }

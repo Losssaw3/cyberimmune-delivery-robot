@@ -30,6 +30,7 @@ public class NavService {
     private Runnable arrivedCallback;
 
     private boolean isRunning = false;
+    private ScheduledFuture<?> updateTask;
 
     public NavService(MonitoredKafkaConsumerFactory consumerFactory,
                       MonitoredKafkaProducerFactory producerFactory) {
@@ -82,14 +83,17 @@ public class NavService {
     }
 
     private void onEnd(Position reachedPos) {
+        if (!isRunning) return;
+
         log.warn("Finished at: {}", reachedPos);
         setMotors(0, 0);
 
         isRunning = false;
         target = null;
+        updateTask.cancel(true);
 
-        executor.shutdownNow();
         arrivedCallback.run();
+        arrivedCallback = null;
     }
 
     private void setMotors(double speed, double angle) {
@@ -114,7 +118,7 @@ public class NavService {
         if (target == null || isRunning) return false;
 
         arrivedCallback = onArrived;
-        executor.scheduleWithFixedDelay(
+        updateTask = executor.scheduleWithFixedDelay(
                 this::update,
                 UPDATE_INTERVAL_SEC, UPDATE_INTERVAL_SEC, TimeUnit.SECONDS
         );
@@ -123,7 +127,6 @@ public class NavService {
     }
 
     public void start() {
-//        consumerService.start();
         requesterService.start();
         log.info("Navigation started");
     }
