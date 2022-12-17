@@ -34,6 +34,10 @@ public class Position {
         return new Position(x / val, y / val, timestampSeconds);
     }
 
+    public double directionTo(Position other) {
+        return Math.atan2(other.y - y, other.x - x);
+    }
+
     @Override
     public Position clone() {
         return new Position(x, y, timestampSeconds);
