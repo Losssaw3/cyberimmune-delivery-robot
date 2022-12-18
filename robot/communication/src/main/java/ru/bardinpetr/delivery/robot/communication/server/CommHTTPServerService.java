@@ -1,10 +1,10 @@
-package ru.bardinpetr.delivery.robot.communication;
+package ru.bardinpetr.delivery.robot.communication.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.deserializers.MonitoredNonBusDeserializer;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
-import ru.bardinpetr.delivery.robot.communication.server.IRequestListener;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
  * Accepts HTTP POST requests on /msg with JSON eligible to be redirected to the monitor,
  * i.e. have valid ser/des request class, have sender/recipient and payload according to libs.messages.msg
  */
+@Slf4j
 public class CommHTTPServerService extends Thread {
 
     private final HttpServer server;
@@ -39,16 +40,20 @@ public class CommHTTPServerService extends Thread {
         server.start();
     }
 
-    private void reply(HttpExchange exchange, int code, String body) throws IOException {
-        exchange.sendResponseHeaders(code, body.length());
+    private void reply(HttpExchange exchange, int code, String body) {
+        try {
+            exchange.sendResponseHeaders(code, body.length());
 
-        var output = exchange.getResponseBody();
-        output.write(body.getBytes());
-        output.flush();
-        output.close();
+            var output = exchange.getResponseBody();
+            output.write(body.getBytes());
+            output.flush();
+            output.close();
+        } catch (IOException ignored) {
+            log.error("Server http send error", ignored);
+        }
     }
 
-    private void handle(HttpExchange exchange) throws IOException {
+    private void handle(HttpExchange exchange) {
         var headers = exchange.getRequestHeaders();
         int contentLength = Integer.parseInt(headers.getFirst("Content-length"));
 

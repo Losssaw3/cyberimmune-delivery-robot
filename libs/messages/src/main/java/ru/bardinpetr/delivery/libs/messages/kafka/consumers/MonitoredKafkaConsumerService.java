@@ -21,8 +21,8 @@ public class MonitoredKafkaConsumerService extends Thread {
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
 
 
-    protected MonitoredKafkaConsumerService(MonitoredKafkaConsumerFactory consumerFactory,
-                                            Map<String, ITopicListener<?>> listenerMap) {
+    public MonitoredKafkaConsumerService(MonitoredKafkaConsumerFactory consumerFactory,
+                                         Map<String, ITopicListener<?>> listenerMap) {
         this.listenerMap = listenerMap;
         receivedMessageIds = new HashSet<>();
 

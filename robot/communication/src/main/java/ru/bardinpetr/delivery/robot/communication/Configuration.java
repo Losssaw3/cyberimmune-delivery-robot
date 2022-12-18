@@ -10,5 +10,8 @@ public class Configuration {
         return environ.getOrDefault("KAFKA_BOOTSTRAP_SERVER", "localhost:9092");
     }
 
+    public static String getServerURI() {
+        return environ.getOrDefault("SERVER_URI", "http://0.0.0.0:9990");
+    }
 }
 
