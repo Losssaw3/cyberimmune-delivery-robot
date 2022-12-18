@@ -5,6 +5,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
+import ru.bardinpetr.delivery.libs.messages.msg.ForwardableMessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.Units;
 import ru.bardinpetr.delivery.robot.communication.client.CommHTTPClientService;
@@ -52,16 +53,31 @@ public class MainService {
         serverService.setRequestCallback(this::onIncomingMessage);
     }
 
+    /**
+     * Forward message from local MB to receiving side via HTTP;
+     * Rewrite message recipient according to forwardTo field.
+     *
+     * @param request Request to be sent via bridge. Should be ForwardableMessageRequest
+     */
     private void onOutgoingMessage(MessageRequest request) {
-        log.info("New MB message arrived: {}", request);
-        clientService.send(request);
+        if (!ForwardableMessageRequest.class.isAssignableFrom(request.getClass())) {
+            log.error("Got message without forwarding marker: {}", request);
+            return;
+        }
+        var fRequest = (ForwardableMessageRequest) request;
+
+        log.info("New MB message arrived: {}", fRequest);
+
+        fRequest.setRecipient(fRequest.getForwardTo());
+        fRequest.setForwarded(true);
+
+        clientService.send(fRequest);
     }
 
     private void onIncomingMessage(MessageRequest request) {
         log.info("New HTTP message arrived: {}", request);
         if (request.getRecipient().equals(SERVICE_NAME)) return;
 
-        request.setSender(SERVICE_NAME);
         producerService.sendMessage(request);
     }
 

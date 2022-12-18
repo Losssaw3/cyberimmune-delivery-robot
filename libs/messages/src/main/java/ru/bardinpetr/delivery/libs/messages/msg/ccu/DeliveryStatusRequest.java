@@ -1,14 +1,14 @@
 package ru.bardinpetr.delivery.libs.messages.msg.ccu;
 
 import lombok.*;
-import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.ForwardableMessageRequest;
 
 @Data
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeliveryStatusRequest extends MessageRequest {
+public class DeliveryStatusRequest extends ForwardableMessageRequest {
     private String text;
     private DeliveryStatus status;
 }

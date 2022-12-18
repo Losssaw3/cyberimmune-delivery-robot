@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.communication;
 
+import java.util.List;
 import java.util.Map;
 
 public class Configuration {
@@ -12,6 +13,10 @@ public class Configuration {
 
     public static String getServerURI() {
         return environ.getOrDefault("SERVER_URI", "http://0.0.0.0:9990");
+    }
+
+    public static List<String> getAllowedMessages() {
+        return List.of(environ.getOrDefault("MESSAGES", "").split(","));
     }
 }
 

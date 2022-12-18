@@ -1,0 +1,18 @@
+- server
+    - host:
+        - 9030 - kafka
+        - 9020 - confluent control center
+        - 9010 - comms unit
+        - 9040 - FMS HTTP API
+    - internal:
+        - zookeeper:2181
+        - broker:29000
+- robot
+    - host:
+        - 9031 - kafka
+        - 9021 - confluent control center
+        - 9011 - comms unit
+        - 9041 - HMI HTTP API
+    - internal:
+        - zookeeper:2181
+        - broker:29000

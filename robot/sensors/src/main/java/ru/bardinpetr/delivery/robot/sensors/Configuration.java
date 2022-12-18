@@ -1,4 +1,4 @@
-package ru.bardinpetr.delivery.robot.motion;
+package ru.bardinpetr.delivery.robot.sensors;
 
 import java.util.Map;
 
