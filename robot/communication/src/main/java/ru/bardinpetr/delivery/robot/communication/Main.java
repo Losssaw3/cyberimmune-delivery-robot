@@ -22,7 +22,7 @@ public class Main {
         var producerFactory = new MonitoredKafkaProducerFactory(kafkaConfig);
         var consumerFactory = new MonitoredKafkaConsumerFactory(kafkaConfig);
 
-        var serverService = new CommHTTPServerService(9990);
+        var serverService = new CommHTTPServerService(Configuration.getPort());
         var clientService = new CommHTTPClientService(Configuration.getServerURI());
 
         var msgs = new ArrayList<Class<? extends MessageRequest>>();

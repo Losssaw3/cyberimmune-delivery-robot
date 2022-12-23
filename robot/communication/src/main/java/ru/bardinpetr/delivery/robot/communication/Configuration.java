@@ -12,11 +12,15 @@ public class Configuration {
     }
 
     public static String getServerURI() {
-        return environ.getOrDefault("SERVER_URI", "http://0.0.0.0:9990");
+        return environ.getOrDefault("SERVER_URI", "http://server-com:9010");
     }
 
     public static List<String> getAllowedMessages() {
         return List.of(environ.getOrDefault("MESSAGES", "").split(","));
+    }
+
+    public static int getPort() {
+        return Integer.parseInt(environ.getOrDefault("PORT", "9010"));
     }
 }
 

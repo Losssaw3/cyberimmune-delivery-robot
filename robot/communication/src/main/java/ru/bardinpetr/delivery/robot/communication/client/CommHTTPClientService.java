@@ -5,6 +5,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.serializers.MonitoredNonBusSer
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -25,20 +26,35 @@ public class CommHTTPClientService {
     }
 
     public boolean send(MessageRequest messageRequest) {
+        return send(baseUrl, messageRequest);
+    }
+
+    public boolean send(String url, MessageRequest messageRequest) {
         var body = serializer.serialize(messageRequest);
 
-        var request = HttpRequest
-                .newBuilder()
-                .uri(URI.create("%s/msg".formatted(baseUrl)))
-                .POST(HttpRequest.BodyPublishers.ofByteArray(body))
-                .header("Content-type", "application/json")
-                .build();
+        log.debug("Sending HTTP {}/msg for {}", url, messageRequest.getActionType());
+
+        HttpRequest request;
+        try {
+            request = HttpRequest
+                    .newBuilder()
+                    .uri(URI.create("http://%s/msg".formatted(url)))
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(body))
+                    .header("Content-type", "application/json")
+                    .build();
+        } catch (IllegalArgumentException e) {
+            log.error("Got invalid message request config", e);
+            return false;
+        }
 
         try {
             var res = client.send(request, HttpResponse.BodyHandlers.ofString());
-            log.debug("Got reply from counterpart: {}", res.body());
+            log.debug("Got HTTP reply from counterpart: {}", res.body());
+        } catch (ConnectException ignored) {
+            log.error("Could not connect to counterpart comm service");
+            return false;
         } catch (IOException | InterruptedException e) {
-            log.error("Could not send HTTP request", e);
+            log.error("HTTP request failed", e);
             return false;
         }
         return true;

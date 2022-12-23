@@ -63,11 +63,14 @@ public class NavService {
                             setMotors(0, 0);
                             return;
                         }
-                        log.debug("Current: {}; target: {}", position, target);
 
                         var angle = position.directionTo(target);
                         var distance = position.distance(target);
-                        log.debug("Distance to target {}; new direction: {}", distance, angle);
+
+                        log.info(
+                                "current pos: %s; dist=%.1f; new direction=%.3f(rad)"
+                                        .formatted(position, distance, angle)
+                        );
 
                         if (distance < POSITION_COMPARISON_THRESHOLD) {
                             onEnd(position);
@@ -77,8 +80,9 @@ public class NavService {
                         setMotors(5, angle);
                     })
                     .get(30, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException ex) {
+        } catch (ExecutionException | TimeoutException ex) {
             log.error("Navigation cycle failed to update position", ex);
+        } catch (InterruptedException ignored) {
         }
     }
 

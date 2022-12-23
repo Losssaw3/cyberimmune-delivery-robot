@@ -35,7 +35,7 @@ public class CoreCryptoService {
 
             var pin = this.aesCryptoService.decrypt(data.getPin());
 
-            return new DeliveryTask(data.getPosition(), pin);
+            return new DeliveryTask("", data.getPosition(), pin);
 
         } catch (Exception ex) {
             log.error("Failed to decrypt task {}: {}", task, ex);

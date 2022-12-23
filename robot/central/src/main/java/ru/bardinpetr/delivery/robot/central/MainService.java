@@ -7,7 +7,10 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
 import ru.bardinpetr.delivery.libs.messages.msg.Units;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.*;
+import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatus;
+import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatusRequest;
+import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryTask;
+import ru.bardinpetr.delivery.libs.messages.msg.ccu.NewTaskRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerDoorClosedRequest;
@@ -20,20 +23,17 @@ import ru.bardinpetr.delivery.robot.central.services.crypto.CoreCryptoService;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = "central";
+    public static final String SERVICE_NAME = Units.CCU.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
 
     private final CoreCryptoService cryptoService;
     private final NavService navService;
-
+    private final Position home;
     private DeliveryStatus currentStatus = DeliveryStatus.IDLE;
     private boolean isHumanDetected = false;
     private DeliveryTask currentTask;
-
-    private final Position home;
-
 
     public MainService(MonitoredKafkaConsumerFactory consumerFactory,
                        MonitoredKafkaProducerFactory producerFactory,
@@ -58,28 +58,23 @@ public class MainService {
         );
 
         home = new Position(0, 0);
-
-        var t = new InputDeliveryTask("XPwjzZNxX9wlQ0hChx4vgDNkM8Bf3As/Nkr40Y/pG3ZEy15dkc+vxikUZ9c/E8lxk4jFiR986MPR8xmvHYPnD4JQFaTmuUP2HF6PIEyOzI1kEjcvP4RRRBc6Tqhtw/h/ATRk0IzuuMEvwiSzhpuOMkhh6o9gK9Ri+6dCcqApXDMmEZ2rIfnH3UMGjxBdretUUI7lK/kuMY96gOwyOanxS6ydY+36lwp4JYTngKGG+7jhdcn/neFlxZ/FttroPuH2d0vXW8s8Jf/K4boB1zgD7mC6MNgLfCj+vhJUx6XfYHBlvt9NcoMK0mATDo3LG4ms//pfzmlIX+Ozl4hRRrznOA==",
-                new DeliveryTask(new Position(100.0, 200.0), "K7cnHXi1JYHebm7Taalf6wAAAAFJPp2UcDJtoa912uzIbAyD"));
-        onNewTask(new NewTaskRequest(t));
     }
 
     private void onNewTask(NewTaskRequest request) {
         log.info("New task: {}; current status: {}", request, currentStatus);
         if (currentStatus != DeliveryStatus.IDLE) {
-            replyStatus("Already running", DeliveryStatus.ENDED_ERR);
+            sendFMSStatus(DeliveryStatus.ENDED_ERR, "Already running");
             return;
         }
 
         var task = cryptoService.decodeTask(request.getDeliveryTask());
         if (task == null) {
-            replyStatus("Could not verify task crypto", DeliveryStatus.ENDED_ERR);
+            sendFMSStatus(DeliveryStatus.ENDED_ERR, "Could not verify task crypto");
             log.error("Failed loading task due to crypto");
             return;
         }
 
-        currentStatus = DeliveryStatus.RUNNING;
-        replyStatus("OK", DeliveryStatus.RUNNING);
+        setStatus(DeliveryStatus.RUNNING);
 
         currentTask = task;
 
@@ -87,14 +82,18 @@ public class MainService {
         navService.setTarget(task.getPosition());
         navService.run(this::onArrived);
 
+        configHumanDetection(task.getPosition());
+    }
+
+    private void configHumanDetection(Position position) {
         producerService.sendMessage(
                 Units.SENSORS,
-                new HumanDetectionConfigRequest(task.getPosition(), 20)
+                new HumanDetectionConfigRequest(position, 20)
         );
     }
 
     private void onArrived() {
-        currentStatus = DeliveryStatus.ARRIVED_TO_CUSTOMER;
+        setStatus(DeliveryStatus.ARRIVED_TO_CUSTOMER);
         log.info("Arrived at destination");
     }
 
@@ -107,7 +106,10 @@ public class MainService {
 
         if (!pin.equals(currentTask.getPin())) {
             log.error("Invalid PIN");
+            sendFMSStatus(DeliveryStatus.PIN_INVALID);
         }
+
+        sendFMSStatus(DeliveryStatus.LOCKER_OPENED);
 
         log.info("Opening locker...");
         producerService.sendMessage(
@@ -118,20 +120,30 @@ public class MainService {
 
     private void onStartReturnHome(LockerDoorClosedRequest request) {
         log.info("Locker closed. Returning home");
-        currentStatus = DeliveryStatus.RETURNING;
+        setStatus(DeliveryStatus.RETURNING);
 
         navService.setTarget(home);
         navService.run(() -> {
             log.info("Returned successfully");
 
-            currentStatus = DeliveryStatus.IDLE;
-            replyStatus("Finished", DeliveryStatus.ENDED_OK);
+            sendFMSStatus(DeliveryStatus.ENDED_OK);
+            setStatus(DeliveryStatus.IDLE);
         });
     }
 
-    private void replyStatus(String text, DeliveryStatus status) {
-        producerService.sendMessage(
-                Units.COMM,
+    private void setStatus(DeliveryStatus status) {
+        currentStatus = status;
+        sendFMSStatus(status);
+    }
+
+    private void sendFMSStatus(DeliveryStatus status) {
+        sendFMSStatus(status, status.toString());
+    }
+
+    private void sendFMSStatus(DeliveryStatus status, String text) {
+        producerService.sendVia(
+                Units.COMM.toString(),
+                Units.FMS.toString(),
                 new DeliveryStatusRequest(text, status)
         );
     }

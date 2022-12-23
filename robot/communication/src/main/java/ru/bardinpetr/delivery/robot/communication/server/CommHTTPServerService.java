@@ -1,13 +1,11 @@
 package ru.bardinpetr.delivery.robot.communication.server;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.deserializers.MonitoredNonBusDeserializer;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
 
 
 /**
@@ -17,76 +15,46 @@ import java.net.InetSocketAddress;
 @Slf4j
 public class CommHTTPServerService extends Thread {
 
-    private final HttpServer server;
     private final MonitoredNonBusDeserializer deserializer;
+    private final Javalin app;
+    private final int port;
 
+    @Setter
     private IRequestListener requestCallback;
 
-
     public CommHTTPServerService(int port) {
-        try {
-            server = HttpServer.create(new InetSocketAddress(port), 0);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        server.createContext("/msg", this::handle);
-        server.setExecutor(null);
+        this.port = port;
+
+        app = Javalin.create()
+                .post("msg", this::onMessage);
 
         deserializer = new MonitoredNonBusDeserializer();
     }
 
-    @Override
-    public void run() {
-        server.start();
-    }
-
-    private void reply(HttpExchange exchange, int code, String body) {
-        try {
-            exchange.sendResponseHeaders(code, body.length());
-
-            var output = exchange.getResponseBody();
-            output.write(body.getBytes());
-            output.flush();
-            output.close();
-        } catch (IOException ignored) {
-            log.error("Server http send error", ignored);
-        }
-    }
-
-    private void handle(HttpExchange exchange) {
-        var headers = exchange.getRequestHeaders();
-        int contentLength = Integer.parseInt(headers.getFirst("Content-length"));
-
-        if (!exchange.getRequestMethod().equals("POST") ||
-                !headers.getFirst("Content-type").equals("application/json") ||
-                contentLength == 0) {
-            this.reply(exchange, 400, "invalid request");
-            return;
-        }
+    private void onMessage(Context ctx) {
+        var body = ctx.body();
 
         MessageRequest msg;
         try {
-            byte[] body = new byte[contentLength];
-            exchange.getRequestBody().read(body);
-
             msg = deserializer.deserialize(body);
         } catch (Exception ex) {
-            this.reply(exchange, 500, "unable to process given message");
+            ctx.status(500);
             return;
         }
 
         if (!msg.isValid()) {
-            this.reply(exchange, 500, "Invalid message type");
+            ctx.status(400);
             return;
         }
 
         if (requestCallback != null)
             requestCallback.onMessage(msg);
 
-        this.reply(exchange, 200, "OK");
+        ctx.status(200);
     }
 
-    public void setRequestCallback(IRequestListener requestCallback) {
-        this.requestCallback = requestCallback;
+    @Override
+    public void run() {
+        app.start("0.0.0.0", port);
     }
 }
