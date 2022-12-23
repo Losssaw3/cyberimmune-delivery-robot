@@ -17,7 +17,10 @@ import ru.bardinpetr.delivery.common.libs.messages.msg.sensors.HumanDetectionCon
 import ru.bardinpetr.delivery.common.monitor.validator.IValidator;
 import ru.bardinpetr.delivery.common.monitor.validator.models.ActionRulesBuilder;
 import ru.bardinpetr.delivery.common.monitor.validator.models.AllowMode;
-import ru.bardinpetr.delivery.common.monitor.validator.models.RuleValidatorBuilder;
+import ru.bardinpetr.delivery.common.monitor.validator.validators.RuleValidatorBuilder;
+import ru.bardinpetr.delivery.common.monitor.validator.validators.TimeIntervalValidator;
+
+import java.util.Map;
 
 import static ru.bardinpetr.delivery.common.libs.messages.msg.Unit.*;
 
@@ -30,121 +33,132 @@ public class Main {
         );
 
         var validators = new IValidator[]{
-                new RuleValidatorBuilder()
-                        .setDefaultMode(AllowMode.DENY)
-                        .addRule(
-                                CreatePINRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(FMS, AUTH)
-                                        .build()
-                        )
-                        .addRule(
-                                CreatePINResponse.class,
-                                new ActionRulesBuilder()
-                                        .allow(AUTH, FMS)
-                                        .build()
-                        )
-                        .addRule(
-                                DeliveryStatusRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, FMS)
-                                        .build()
-                        )
-                        .addRule(
-                                NewTaskRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(FMS, CCU)
-                                        .build()
-                        )
-                        .addRule(
-                                PINEnterRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(HMI, CCU)
-                                        .build()
-                        )
-                        .addRule(
-                                PINValidationResponse.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, HMI)
-                                        .build()
-                        )
-                        .addRule(
-                                PositionRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, LOC)
-                                        .allow(LOC, POS_ODOM)
-                                        .allow(POS_ODOM, MOTION)
-                                        .build()
-                        )
-                        .addRule(
-                                PositionReply.class,
-                                new ActionRulesBuilder()
-                                        .allow(MOTION, POS_ODOM)
-                                        .allow(POS_ODOM, LOC)
-                                        .allow(LOC, CCU)
-                                        .build()
-                        )
-                        .addRule(
-                                LockerOpenRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, LOCKER)
-                                        .build()
-                        )
-                        .addRule(
-                                LockerDoorClosedRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(LOCKER, CCU)
-                                        .build()
-                        )
-                        .addRule(
-                                GetMotionDataRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(POS_ODOM, MOTION)
-                                        .build()
-                        )
-                        .addRule(
-                                GetMotionDataReply.class,
-                                new ActionRulesBuilder()
-                                        .allow(MOTION, POS_ODOM)
-                                        .build()
-                        )
-                        .addRule(
-                                GetRestrictionsRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, MOTION)
-                                        .allow(LOC, MOTION)
-                                        .build()
-                        )
-                        .addRule(
-                                GetRestrictionsReply.class,
-                                new ActionRulesBuilder()
-                                        .allow(MOTION, CCU)
-                                        .allow(MOTION, LOC)
-                                        .build()
-                        )
-                        .addRule(
-                                SetSpeedRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, MOTION)
-                                        .allow(LOC, MOTION)
-                                        .build()
-                        )
-                        .addRule(
-                                HumanDetectionConfigRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(CCU, SENSORS)
-                                        .build()
-                        )
-                        .addRule(
-                                HumanDetectedRequest.class,
-                                new ActionRulesBuilder()
-                                        .allow(SENSORS, CCU)
-                                        .build()
-                        )
-                        .build()
+                createRuleValidator(),
+                createTimeValidator()
         };
 
         var consumer = new MonitorService(configs, validators);
         consumer.start();
+    }
+
+    private static IValidator createTimeValidator() {
+        return new TimeIntervalValidator(Map.of(
+                PINEnterRequest.class, 3 * 1000L
+        ));
+    }
+
+    private static IValidator createRuleValidator() {
+        return new RuleValidatorBuilder()
+                .setDefaultMode(AllowMode.DENY)
+                .addRule(
+                        CreatePINRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(FMS, AUTH)
+                                .build()
+                )
+                .addRule(
+                        CreatePINResponse.class,
+                        new ActionRulesBuilder()
+                                .allow(AUTH, FMS)
+                                .build()
+                )
+                .addRule(
+                        DeliveryStatusRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, FMS)
+                                .build()
+                )
+                .addRule(
+                        NewTaskRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(FMS, CCU)
+                                .build()
+                )
+                .addRule(
+                        PINEnterRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(HMI, CCU)
+                                .build()
+                )
+                .addRule(
+                        PINValidationResponse.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, HMI)
+                                .build()
+                )
+                .addRule(
+                        PositionRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, LOC)
+                                .allow(LOC, POS_ODOM)
+                                .allow(POS_ODOM, MOTION)
+                                .build()
+                )
+                .addRule(
+                        PositionReply.class,
+                        new ActionRulesBuilder()
+                                .allow(MOTION, POS_ODOM)
+                                .allow(POS_ODOM, LOC)
+                                .allow(LOC, CCU)
+                                .build()
+                )
+                .addRule(
+                        LockerOpenRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, LOCKER)
+                                .build()
+                )
+                .addRule(
+                        LockerDoorClosedRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(LOCKER, CCU)
+                                .build()
+                )
+                .addRule(
+                        GetMotionDataRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(POS_ODOM, MOTION)
+                                .build()
+                )
+                .addRule(
+                        GetMotionDataReply.class,
+                        new ActionRulesBuilder()
+                                .allow(MOTION, POS_ODOM)
+                                .build()
+                )
+                .addRule(
+                        GetRestrictionsRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, MOTION)
+                                .allow(LOC, MOTION)
+                                .build()
+                )
+                .addRule(
+                        GetRestrictionsReply.class,
+                        new ActionRulesBuilder()
+                                .allow(MOTION, CCU)
+                                .allow(MOTION, LOC)
+                                .build()
+                )
+                .addRule(
+                        SetSpeedRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, MOTION)
+                                .allow(LOC, MOTION)
+                                .build()
+                )
+                .addRule(
+                        HumanDetectionConfigRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(CCU, SENSORS)
+                                .build()
+                )
+                .addRule(
+                        HumanDetectedRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(SENSORS, CCU)
+                                .build()
+                )
+                .build();
     }
 }

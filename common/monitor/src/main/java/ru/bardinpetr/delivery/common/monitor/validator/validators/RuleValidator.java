@@ -1,6 +1,7 @@
-package ru.bardinpetr.delivery.common.monitor.validator;
+package ru.bardinpetr.delivery.common.monitor.validator.validators;
 
 import ru.bardinpetr.delivery.common.libs.messages.msg.MessageRequest;
+import ru.bardinpetr.delivery.common.monitor.validator.IValidator;
 import ru.bardinpetr.delivery.common.monitor.validator.models.ActionRules;
 import ru.bardinpetr.delivery.common.monitor.validator.models.AllowMode;
 import ru.bardinpetr.delivery.common.monitor.validator.models.RequestActors;
