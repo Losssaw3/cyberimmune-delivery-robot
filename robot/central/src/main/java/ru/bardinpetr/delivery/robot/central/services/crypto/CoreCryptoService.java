@@ -1,7 +1,6 @@
 package ru.bardinpetr.delivery.robot.central.services.crypto;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.crypto.AESCryptoService;
 import ru.bardinpetr.delivery.libs.crypto.SignatureCryptoService;
 import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryTask;
 import ru.bardinpetr.delivery.libs.messages.msg.ccu.InputDeliveryTask;
@@ -9,12 +8,9 @@ import ru.bardinpetr.delivery.libs.messages.msg.ccu.InputDeliveryTask;
 @Slf4j
 public class CoreCryptoService {
     private final SignatureCryptoService signatureCryptoService;
-    private final AESCryptoService aesCryptoService;
 
-
-    public CoreCryptoService(SignatureCryptoService signatureCryptoService, AESCryptoService aesCryptoService) {
+    public CoreCryptoService(SignatureCryptoService signatureCryptoService) {
         this.signatureCryptoService = signatureCryptoService;
-        this.aesCryptoService = aesCryptoService;
     }
 
     /**
@@ -33,9 +29,7 @@ public class CoreCryptoService {
             ))
                 return null;
 
-            var pin = this.aesCryptoService.decrypt(data.getPin());
-
-            return new DeliveryTask("", data.getPosition(), pin);
+            return new DeliveryTask("", data.getPosition(), data.getPin());
 
         } catch (Exception ex) {
             log.error("Failed to decrypt task {}: {}", task, ex);

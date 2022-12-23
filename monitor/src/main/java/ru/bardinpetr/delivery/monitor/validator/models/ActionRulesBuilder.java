@@ -1,5 +1,7 @@
 package ru.bardinpetr.delivery.monitor.validator.models;
 
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +20,17 @@ public class ActionRulesBuilder {
         return this;
     }
 
+    public ActionRulesBuilder allow(Unit from, Unit to) {
+        return allow(RequestActors.of(from.name(), to.name()));
+    }
+
     public ActionRulesBuilder deny(RequestActors actors) {
         actorsAllowance.put(actors, AllowMode.DENY);
         return this;
+    }
+
+    public ActionRulesBuilder deny(Unit from, Unit to) {
+        return deny(RequestActors.of(from.name(), to.name()));
     }
 
     public ActionRules build() {

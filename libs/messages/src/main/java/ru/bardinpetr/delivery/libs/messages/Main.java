@@ -5,7 +5,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
 import ru.bardinpetr.delivery.libs.messages.msg.motion.SetSpeedRequest;
@@ -50,8 +50,8 @@ public class Main {
 
         System.out.println("started");
 
-        producer.sendMessage(Units.MOTION, new SetSpeedRequest(5, 0));
-        producer.sendMessage(Units.SENSORS, new HumanDetectionConfigRequest(new Position(100, 0), 50));
+        producer.sendMessage(Unit.MOTION, new SetSpeedRequest(5, 0));
+        producer.sendMessage(Unit.SENSORS, new HumanDetectionConfigRequest(new Position(100, 0), 50));
 
 //        producer.sendMessage(Units.MOTION, new SetSpeedRequest(1, 0));
 //        Thread.sleep(10000);

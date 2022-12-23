@@ -7,7 +7,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProduc
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
 import ru.bardinpetr.delivery.libs.messages.msg.ForwardableMessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.robot.communication.client.CommHTTPClientService;
 import ru.bardinpetr.delivery.robot.communication.server.CommHTTPServerService;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = Units.COMM.toString();
+    public static final String SERVICE_NAME = Unit.COMM.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataReply;
 import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataRequest;
@@ -24,7 +24,7 @@ public class MockHardwareOdometer extends Thread implements IPositionService {
                                 MonitoredKafkaProducerFactory producerFactory) {
 
         kafka = new MonitoredKafkaRequesterService(
-                Units.POS_ODOM.toString(),
+                Unit.POS_ODOM.toString(),
                 List.of(GetMotionDataReply.class),
                 producerFactory,
                 consumerFactory
@@ -38,7 +38,7 @@ public class MockHardwareOdometer extends Thread implements IPositionService {
             log.debug("Starting update");
             var reply =
                     (GetMotionDataReply) kafka
-                            .request(Units.MOTION.toString(), new GetMotionDataRequest())
+                            .request(Unit.MOTION.toString(), new GetMotionDataRequest())
                             .get(30, TimeUnit.SECONDS);
 
             log.debug("New data from motion unit: {}", reply);

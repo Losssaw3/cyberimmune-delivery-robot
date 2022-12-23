@@ -5,7 +5,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import ru.bardinpetr.delivery.libs.messages.msg.ForwardableMessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.ReplyableMessageRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -60,7 +60,7 @@ public class MonitoredKafkaProducerService {
         return sendMessage(request);
     }
 
-    public String sendMessage(Units recipient, MessageRequest request) {
+    public String sendMessage(Unit recipient, MessageRequest request) {
         return sendMessage(recipient.toString(), request);
     }
 

@@ -9,5 +9,5 @@ import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PINValidationResponse extends MessageRequest {
-    private boolean isValid;
+    private boolean isOk;
 }

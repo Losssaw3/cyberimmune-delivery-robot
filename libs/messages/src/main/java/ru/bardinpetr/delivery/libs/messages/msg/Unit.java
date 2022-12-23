@@ -1,6 +1,6 @@
 package ru.bardinpetr.delivery.libs.messages.msg;
 
-public enum Units {
+public enum Unit {
     CCU("central"),
     FMS("fms"),
     AUTH("auth"),
@@ -14,7 +14,7 @@ public enum Units {
 
     private final String name;
 
-    Units(String name) {
+    Unit(String name) {
         this.name = name;
     }
 

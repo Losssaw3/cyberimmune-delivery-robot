@@ -7,7 +7,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
 import ru.bardinpetr.delivery.robot.location.aggregator.PositionAggregator;
@@ -41,18 +41,18 @@ public class MainService {
         this.updateIntervalSeconds = updateIntervalSeconds;
         this.aggregatedServices = aggregatedServices;
 
-        consumerService = new MonitoredKafkaConsumerServiceBuilder(Units.LOC.toString())
+        consumerService = new MonitoredKafkaConsumerServiceBuilder(Unit.LOC.toString())
                 .setConsumerFactory(consumerFactory)
                 .subscribe(PositionRequest.class, this::positionRequest)
                 .build();
 
         producerService = new MonitoredKafkaProducerService(
-                Units.LOC.toString(),
+                Unit.LOC.toString(),
                 producerFactory
         );
 
         requesterService = new MonitoredKafkaRequesterService(
-                Units.LOC.toString(),
+                Unit.LOC.toString(),
                 List.of(PositionReply.class),
                 producerFactory,
                 consumerFactory

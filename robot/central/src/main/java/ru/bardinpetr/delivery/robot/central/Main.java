@@ -19,7 +19,6 @@ public class Main {
         var consumerFactory = new MonitoredKafkaConsumerFactory(kafkaConfig);
 
         var crypto = CoreCryptoServiceFactory.getService(
-                Configuration.getAesKeystorePath(), Configuration.getAesKeystorePass(),
                 Configuration.getSignKeystorePath(), Configuration.getSignKeystorePass()
         );
 

@@ -6,7 +6,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerDoorClosedRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerOpenRequest;
 import ru.bardinpetr.delivery.robot.locker.hardware.LockerController;
@@ -18,7 +18,7 @@ import ru.bardinpetr.delivery.robot.locker.hardware.LockerController;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = Units.LOCKER.toString();
+    public static final String SERVICE_NAME = Unit.LOCKER.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
@@ -47,7 +47,7 @@ public class MainService {
                 5,
                 () -> {
                     log.info("Door has been closed by user");
-                    producerService.sendMessage(Units.CCU, new LockerDoorClosedRequest());
+                    producerService.sendMessage(Unit.CCU, new LockerDoorClosedRequest());
                 }
         );
     }

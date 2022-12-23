@@ -10,14 +10,6 @@ public class Configuration {
         return environ.getOrDefault("KAFKA_BOOTSTRAP_SERVER", "localhost:9092");
     }
 
-    public static String getAesKeystorePath() {
-        return environ.getOrDefault("AES_KS_PATH", "certs/secret_keystore.p12");
-    }
-
-    public static String getAesKeystorePass() {
-        return environ.getOrDefault("AES_KS_PASS", "");
-    }
-
     public static String getSignKeystorePath() {
         return environ.getOrDefault("SIGN_KS_PATH", "certs/client_sign_keystore.p12");
     }

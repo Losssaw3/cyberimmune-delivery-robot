@@ -6,7 +6,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectedRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 import ru.bardinpetr.delivery.robot.sensors.hardware.PositioningHumanDetector;
@@ -19,7 +19,7 @@ import ru.bardinpetr.delivery.robot.sensors.hardware.PositioningHumanDetector;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = Units.SENSORS.toString();
+    public static final String SERVICE_NAME = Unit.SENSORS.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
@@ -42,8 +42,8 @@ public class MainService {
 
         this.detector = detector;
         this.detector.setCallback(() -> {
-                    log.info("Human detected");
-                    producerService.sendMessage(Units.CCU.toString(), new HumanDetectedRequest());
+            log.info("Human detected");
+            producerService.sendMessage(Unit.CCU.toString(), new HumanDetectedRequest());
                 }
         );
     }

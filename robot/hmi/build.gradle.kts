@@ -7,4 +7,5 @@ version = "1.0"
 
 dependencies {
     implementation(project(":libs:messages"))
+    implementation(project(":libs:crypto"))
 }

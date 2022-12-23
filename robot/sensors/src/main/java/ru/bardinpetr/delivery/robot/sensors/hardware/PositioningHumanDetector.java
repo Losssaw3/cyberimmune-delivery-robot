@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
@@ -28,7 +28,7 @@ public class PositioningHumanDetector extends Thread implements IHumanDetector {
     public PositioningHumanDetector(MonitoredKafkaConsumerFactory consumerFactory, MonitoredKafkaProducerFactory producerFactory, int checkInterval) {
         this.checkInterval = checkInterval;
 
-        kafka = new MonitoredKafkaRequesterService(Units.SENSORS.toString(), List.of(PositionReply.class), producerFactory, consumerFactory);
+        kafka = new MonitoredKafkaRequesterService(Unit.SENSORS.toString(), List.of(PositionReply.class), producerFactory, consumerFactory);
 
         executorService = Executors.newSingleThreadScheduledExecutor();
     }
@@ -54,7 +54,7 @@ public class PositioningHumanDetector extends Thread implements IHumanDetector {
         try {
             var reply =
                     (PositionReply) kafka
-                            .request(Units.LOC.toString(), new PositionRequest())
+                            .request(Unit.LOC.toString(), new PositionRequest())
                             .get(60, TimeUnit.SECONDS);
             var dist = reply.getPosition().distance(targetLocation);
             log.info("Got distance {}", dist);

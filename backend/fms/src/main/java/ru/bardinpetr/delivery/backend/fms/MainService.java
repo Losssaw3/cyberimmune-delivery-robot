@@ -9,7 +9,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.authentication.CreatePINRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.authentication.CreatePINResponse;
 import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatusRequest;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = Units.FMS.toString();
+    public static final String SERVICE_NAME = Unit.FMS.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
@@ -90,7 +90,7 @@ public class MainService {
         try {
             pinResponse =
                     (CreatePINResponse) requesterService
-                            .request(Units.AUTH.toString(), new CreatePINRequest(task.getTask().getUserId()))
+                            .request(Unit.AUTH.toString(), new CreatePINRequest(task.getTask().getUserId()))
                             .get(30, TimeUnit.SECONDS);
             log.info("Got PIN info: {}", pinResponse);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -106,9 +106,9 @@ public class MainService {
 
         log.info("Sending task to {} robot: {}", url, task);
         producerService.sendVia(
-                Units.COMM.toString(),
+                Unit.COMM.toString(),
                 url,
-                Units.CCU.toString(),
+                Unit.CCU.toString(),
                 new NewTaskRequest(task)
         );
 

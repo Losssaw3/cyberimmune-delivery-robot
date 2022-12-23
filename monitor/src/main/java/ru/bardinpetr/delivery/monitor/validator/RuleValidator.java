@@ -28,6 +28,6 @@ public class RuleValidator implements IValidator {
         if (rule == null)
             return defaultMode == AllowMode.ALLOW;
 
-        return rule.validate(new RequestActors(request.getSender(), request.getRecipient()));
+        return rule.validate(RequestActors.of(request.getSender(), request.getRecipient()));
     }
 }

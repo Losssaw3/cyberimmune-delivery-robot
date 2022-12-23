@@ -5,7 +5,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.Units;
+import ru.bardinpetr.delivery.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionReply;
 import ru.bardinpetr.delivery.libs.messages.msg.location.PositionRequest;
@@ -54,7 +54,7 @@ public class NavService {
     private void update() {
         try {
             requesterService
-                    .request(Units.LOC.toString(), new PositionRequest())
+                    .request(Unit.LOC.toString(), new PositionRequest())
                     .thenApply(reply -> (PositionReply) reply)
                     .thenApply(reply -> (reply.getAccuracy() > 0 ? reply.getPosition() : null))
                     .thenAccept(position -> {
@@ -102,7 +102,7 @@ public class NavService {
 
     private void setMotors(double speed, double angle) {
         producerService.sendMessage(
-                Units.MOTION,
+                Unit.MOTION,
                 new SetSpeedRequest(speed, angle)
         );
     }
