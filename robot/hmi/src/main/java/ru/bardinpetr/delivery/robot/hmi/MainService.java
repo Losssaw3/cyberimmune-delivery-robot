@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.robot.hmi;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 /**
  * Provides a user interface to enter PIN code. Sends PIN code to central control unit.
  */
+@Slf4j
 public class MainService {
     public static final String SERVICE_NAME = Units.HMI.toString();
 
@@ -71,6 +73,7 @@ public class MainService {
     }
 
     private String handler(String pin) {
+        log.info("Got pin from user: {}; attempts count: {}; last at: {}", pin, tries, lastTryTime);
         if (!checkCount())
             return String.format("You have %s tries each %s seconds", MAX_TRY_COUNT, RETRY_DELAY_SEC);
 

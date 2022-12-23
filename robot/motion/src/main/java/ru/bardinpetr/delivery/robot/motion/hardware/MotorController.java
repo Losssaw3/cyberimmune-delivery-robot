@@ -19,7 +19,7 @@ public class MotorController {
         currentTarget = restrictions.apply(params);
         odometryController.update(currentTarget);
         // send commands to motors
-        log.warn("Sending to hardware: {}", params);
+        log.info("Sending to hardware: {}", params);
     }
 
     public MotorRestrictions getRestrictions() {

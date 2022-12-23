@@ -6,6 +6,7 @@ import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsum
 import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
+import ru.bardinpetr.delivery.libs.messages.msg.Units;
 import ru.bardinpetr.delivery.libs.messages.msg.motion.*;
 import ru.bardinpetr.delivery.robot.motion.hardware.MotorController;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
@@ -13,12 +14,12 @@ import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 /**
  * Service for controlling motors.
  * Provides interface to control throttle and direction.
- * Automatically calculates
+ * Automatically calculates position based on input speed data
  */
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = "motion";
+    public static final String SERVICE_NAME = Units.MOTION.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
@@ -44,7 +45,7 @@ public class MainService {
     }
 
     private void setSpeed(SetSpeedRequest request) {
-        log.info("New target: {}", request);
+        log.info("New speed: {}", request);
         motorController.set(new MotorParams(request.getSpeed(), request.getAngle()));
     }
 

@@ -19,7 +19,7 @@ import ru.bardinpetr.delivery.robot.sensors.hardware.PositioningHumanDetector;
 @Slf4j
 public class MainService {
 
-    public static final String SERVICE_NAME = "sensors";
+    public static final String SERVICE_NAME = Units.SENSORS.toString();
 
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;

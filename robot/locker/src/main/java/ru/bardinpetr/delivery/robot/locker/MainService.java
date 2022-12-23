@@ -45,7 +45,10 @@ public class MainService {
     private void onRequest(LockerOpenRequest request) {
         this.controller.openLocker(
                 5,
-                () -> producerService.sendMessage(Units.CCU, new LockerDoorClosedRequest())
+                () -> {
+                    log.info("Door has been closed by user");
+                    producerService.sendMessage(Units.CCU, new LockerDoorClosedRequest());
+                }
         );
     }
 

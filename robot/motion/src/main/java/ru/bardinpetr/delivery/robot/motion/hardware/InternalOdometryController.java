@@ -35,6 +35,6 @@ public class InternalOdometryController {
         position = getPosition();
         motors = currentTarget;
         lastUpdateTime = Instant.now();
-        log.info("Calculated position before updating motor params: {}", position);
+        log.debug("Calculated position before updating motor params: {}", position);
     }
 }

@@ -290,3 +290,4 @@ gradle-app.setting
 
 *.p12
 certs/
+logs/
