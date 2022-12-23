@@ -12,11 +12,10 @@ import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafk
 import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINResponse;
-import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryStatusRequest;
-import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryTask;
-import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.InputDeliveryTask;
-import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.NewTaskRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.*;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class MainService {
         var available =
                 robots
                         .values().stream()
-                        .filter(Robot::isIDLE)
+                        .filter(r -> r.getStatus() == DeliveryStatus.IDLE)
                         .findFirst();
 
         if (available.isEmpty()) {
@@ -118,16 +117,41 @@ public class MainService {
     }
 
     private void onMessage(DeliveryStatusRequest request) {
-        log.warn("Got msg from robot: {}", request);
+        var senderIp = request.getSenderBridgeURL();
+        log.warn("Got msg from robot: {}", senderIp);
+
+        var robot =
+                robots
+                        .values().stream()
+                        .filter(i -> i.getRealIP().equals(senderIp))
+                        .findFirst();
+        if (robot.isEmpty()) return;
+
+        var id = robot.get().getUrl();
+        robots
+                .get(id)
+                .setStatus(request.getStatus());
+
+        log.info("Status for {} updated to {}", id, request.getStatus());
     }
 
-    private String newRobot(String ip) {
-        log.info("New robot at {}", ip);
-        if (robots.containsKey(ip)) {
+    private String newRobot(String url) {
+        log.info("New robot at {}", url);
+        if (robots.containsKey(url)) {
             return "exists";
         }
-        robots.put(ip, new Robot(ip));
-        log.info("All robots now: {}", robots);
+
+        var real = url;
+        try {
+            real = InetAddress
+                    .getByName(url.replaceAll(":\\d+", ""))
+                    .getHostAddress();
+        } catch (UnknownHostException ignored) {
+        }
+
+        robots.put(url, new Robot(url, real));
+
+        log.info("Updated robots: {}", robots.values());
         return "OK";
     }
 

@@ -79,6 +79,7 @@ services:
 
   server_fms:
     networks:
+      - comms_net
       - server_net
       - web_net
     image: delivery-fms:latest

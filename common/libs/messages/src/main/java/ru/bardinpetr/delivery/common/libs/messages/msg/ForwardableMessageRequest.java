@@ -10,5 +10,6 @@ import lombok.ToString;
 public class ForwardableMessageRequest extends MessageRequest {
     private String forwardTo;
     private boolean isForwarded = false;
-    private String forwardBridgeURL = null;
+    private String recipientBridgeURL = null;
+    private String senderBridgeURL = null;
 }

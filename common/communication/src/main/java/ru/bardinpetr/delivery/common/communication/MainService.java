@@ -73,13 +73,12 @@ public class MainService {
         fRequest.setRecipient(fRequest.getForwardTo());
         fRequest.setForwarded(true);
 
-        var targetURL = fRequest.getForwardBridgeURL();
+        var targetURL = fRequest.getRecipientBridgeURL();
 
         boolean result;
         if (targetURL != null && !targetURL.isEmpty()) {
             log.info("Passing message ID{} to {}", fRequest.getRequestId(), targetURL);
             result = clientService.send(targetURL, fRequest);
-
         } else {
             log.info("Passing message ID{} to default endpoint", fRequest.getRequestId());
             result = clientService.send(fRequest);
@@ -88,14 +87,17 @@ public class MainService {
         log.info("HTTP sending ID{} Ok?={}", fRequest.getRequestId(), result);
     }
 
-    private void onIncomingMessage(MessageRequest request) {
+    private void onIncomingMessage(String physicalSender, MessageRequest request) {
         log.debug("New HTTP message arrived: {}", request);
-        log.info("New HTTP message {} ({}->{}) ID{}",
+        log.info("New HTTP message from {}: {} ({}->{}) ID{}", physicalSender,
                 request.getActionType(), request.getSender(), request.getRecipient(), request.getRequestId());
 
         if (request.getRecipient().equals(SERVICE_NAME)) return;
 
-        producerService.sendMessage(request);
+        var real = (ForwardableMessageRequest) request;
+        real.setSenderBridgeURL(physicalSender);
+
+        producerService.sendMessage(real);
     }
 
     public void start() {

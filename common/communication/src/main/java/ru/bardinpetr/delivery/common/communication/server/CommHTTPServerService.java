@@ -48,7 +48,7 @@ public class CommHTTPServerService extends Thread {
         }
 
         if (requestCallback != null)
-            requestCallback.onMessage(msg);
+            requestCallback.onMessage(ctx.ip(), msg);
 
         ctx.status(200);
     }

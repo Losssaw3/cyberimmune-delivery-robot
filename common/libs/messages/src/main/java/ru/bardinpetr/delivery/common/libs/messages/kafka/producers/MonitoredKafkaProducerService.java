@@ -88,7 +88,7 @@ public class MonitoredKafkaProducerService {
      */
     public String sendVia(String viaService, String targetURL, String targetService, ForwardableMessageRequest request) {
         request.setForwardTo(targetService);
-        request.setForwardBridgeURL(targetURL);
+        request.setRecipientBridgeURL(targetURL);
         return sendMessage(viaService, request);
     }
 }
