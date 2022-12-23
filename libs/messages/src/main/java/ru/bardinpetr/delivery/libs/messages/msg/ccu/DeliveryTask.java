@@ -9,6 +9,7 @@ import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryTask {
+    private String userId;
     private Position position;
     private String pin;
 

@@ -2,6 +2,7 @@ package ru.bardinpetr.delivery.libs.messages.kafka.producers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import ru.bardinpetr.delivery.libs.messages.msg.ForwardableMessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.ReplyableMessageRequest;
 import ru.bardinpetr.delivery.libs.messages.msg.Units;
@@ -72,5 +73,22 @@ public class MonitoredKafkaProducerService {
     public String sendReply(ReplyableMessageRequest request, MessageRequest reply) {
         reply.asReplyTo(request);
         return sendMessage(reply);
+    }
+
+    /**
+     * Send message to destination via another service working with ForwardableMessageRequests
+     */
+    public String sendVia(String viaService, String targetService, ForwardableMessageRequest request) {
+        request.setForwardTo(targetService);
+        return sendMessage(viaService, request);
+    }
+
+    /**
+     * Send message to destination via Communication service
+     */
+    public String sendVia(String viaService, String targetURL, String targetService, ForwardableMessageRequest request) {
+        request.setForwardTo(targetService);
+        request.setForwardBridgeURL(targetURL);
+        return sendMessage(viaService, request);
     }
 }

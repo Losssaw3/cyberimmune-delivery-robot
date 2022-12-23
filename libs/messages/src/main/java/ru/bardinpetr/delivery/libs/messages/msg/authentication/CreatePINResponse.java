@@ -9,6 +9,6 @@ import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreatePINResponse extends MessageRequest {
-    private String AESEncryptedPIN;
+    private String encryptedPin;
 
 }

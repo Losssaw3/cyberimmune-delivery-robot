@@ -4,7 +4,7 @@ import lombok.*;
 import ru.bardinpetr.delivery.libs.messages.msg.ForwardableMessageRequest;
 
 @Data
-@ToString(callSuper = true)
+@ToString(callSuper = false)
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor

@@ -5,9 +5,9 @@ include(
 )
 include("monitor")
 include(
-    "backend:flightmanager",
     "backend:authentication",
-    "backend:store"
+    "backend:store",
+    "backend:fms"
 )
 include(
     "robot:hmi",
@@ -18,5 +18,5 @@ include(
     "robot:odometer",
     "robot:location",
     "robot:central",
-    "robot:communication",
+    "robot:communication"
 )

@@ -1,9 +1,7 @@
 package ru.bardinpetr.delivery.backend.store;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ru.bardinpetr.delivery.libs.crypto.AESCryptoService;
 import ru.bardinpetr.delivery.libs.crypto.SignatureCryptoService;
-import ru.bardinpetr.delivery.libs.crypto.keystore.KeystoreServicePin;
 import ru.bardinpetr.delivery.libs.crypto.keystore.KeystoreServiceSign;
 import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryTask;
 import ru.bardinpetr.delivery.libs.messages.msg.ccu.InputDeliveryTask;
@@ -27,45 +25,55 @@ public class Main {
         try (var is = Main.class.getClassLoader().getResourceAsStream("config.properties")) {
             props.load(is);
         }
-
-        var keystoreSign = new KeystoreServiceSign();
-        var key = keystoreSign.getPrivateFromKeystore(
-                props.getProperty("keystore_path"),
-                props.getProperty("keystore_pass")
-        );
-        var sign = new SignatureCryptoService(key);
-
-        var keystorePin = new KeystoreServicePin();
-        var keyPin = keystorePin.getFromKeystore(
-                props.getProperty("keystore_pin_path"),
-                props.getProperty("keystore_pin_pass")
-        );
-        var crypt = new AESCryptoService(keyPin);
-
-        var task = new DeliveryTask(
-                new Position(100, 200),
-                crypt.encrypt("123456")
-        );
-        var outTask = new InputDeliveryTask(
-                sign.sign(task.toSignString()),
-                task
-        );
-        System.out.println(outTask);
-
-        String data = (new ObjectMapper()).writeValueAsString(outTask);
-
+        var fmsUrl = props.getProperty("fms_url", "http://localhost:9040");
         var client = HttpClient.newHttpClient();
+
         HttpRequest request = HttpRequest
                 .newBuilder()
-                .uri(URI.create(props.getProperty("fms_url", "http://localhost:5000") + "/newTask"))
-                .POST(HttpRequest.BodyPublishers.ofString(data))
-                .header("Accept", "application/json")
+                .uri(URI.create("%s/newRobot?url=%s".formatted(
+                        fmsUrl,
+                        props.getProperty("robot_url", "localhost:9011")
+                )))
+                .GET()
                 .build();
-
         try {
             client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        var task = getTask(props);
+        var request2 = HttpRequest
+                .newBuilder()
+                .uri(URI.create(fmsUrl + "/newTask"))
+                .POST(
+                        HttpRequest.BodyPublishers.ofString(
+                                (new ObjectMapper()).writeValueAsString(task)
+                        )
+                )
+                .header("Accept", "application/json")
+                .build();
+        try {
+            client.send(request2, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static InputDeliveryTask getTask(Properties props) {
+        var sign = new SignatureCryptoService(
+                (new KeystoreServiceSign()).getPrivateFromKeystore(
+                        props.getProperty("keystore_path"),
+                        props.getProperty("keystore_pass")
+                )
+        );
+
+        var task = new DeliveryTask("user1", new Position(50, 100), "");
+        var outTask = new InputDeliveryTask(
+                sign.sign(task.toSignString()),
+                task
+        );
+        System.out.println(outTask);
+        return outTask;
     }
 }

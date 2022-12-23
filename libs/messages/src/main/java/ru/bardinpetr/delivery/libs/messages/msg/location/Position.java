@@ -42,4 +42,9 @@ public class Position {
     public Position clone() {
         return new Position(x, y, timestampSeconds);
     }
+
+    @Override
+    public String toString() {
+        return "(%.3f, %.3f @ %d)".formatted(x, y, timestampSeconds);
+    }
 }

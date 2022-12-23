@@ -3,7 +3,7 @@ plugins {
 }
 
 version = "1.0"
-group = "ru.bardinpetr.delivery.backend.store"
+group = "ru.bardinpetr.delivery.backend"
 
 
 dependencies {
