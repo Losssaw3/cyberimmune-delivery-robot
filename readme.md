@@ -4,6 +4,7 @@
         - 9020 - kafka ui
         - 9030 - kafka
         - 9040 - FMS HTTP API
+        - 9044 - WEB STORE HTTP API
     - internal:
         - zookeeper:2181
         - broker:29000

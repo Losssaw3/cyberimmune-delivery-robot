@@ -82,6 +82,7 @@ services:
   server_fms:
     networks:
       - server_net
+      - web_net
     image: delivery-fms:latest
     ports:
       - "9040:9040"
@@ -92,7 +93,19 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
 
+  server_store:
+    networks:
+      - web_net
+    image: delivery-store:latest
+    ports:
+      - "9044:9044"
+    depends_on:
+      - server_fms
+
+
 networks:
+  web_net:
+    driver: bridge
   server_net:
     driver: bridge
   comms_net:
