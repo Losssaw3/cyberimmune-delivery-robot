@@ -1,79 +1,101 @@
 version: '3.8'
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
+  server_zookeeper:
+    networks:
+      - server_net
+    image: 'bitnami/zookeeper:latest'
     hostname: zookeeper
-    container_name: zookeeper
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+      - ALLOW_ANONYMOUS_LOGIN=yes
 
-  broker:
-    image: confluentinc/cp-server:7.3.0
+  server_broker:
+    networks:
+      - server_net
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9030:9030'
     hostname: broker
-    container_name: broker
-    depends_on:
-      - zookeeper
-    ports:
-      - "9030:9092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29000,PLAINTEXT_HOST://localhost:9030
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-
-  control-center:
-    image: confluentinc/cp-enterprise-control-center:7.3.0
-    hostname: control-center
-    container_name: control-center
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_LISTENERS=CLIENT://:29000,EXTERNAL://:9030
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://broker:29000,EXTERNAL://localhost:9030
     depends_on:
-      - broker
-    ports:
-      - "9020:9021"
-    environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29000'
-      CONTROL_CENTER_REPLICATION_FACTOR: 1
-      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
-      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
-      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-      PORT: 9021
+      - server_zookeeper
+    healthcheck:
+      test: /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29000 --list
+      interval: 2s
+      start_period: 10s
+      timeout: 15s
+      retries: 100
 
-  monitor:
+  server_kafka_ui:
+    networks:
+      - server_net
+    image: 'provectuslabs/kafka-ui:latest'
+    ports:
+      - '9020:8080'
+    depends_on:
+      - server_broker
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=broker:29000
+
+  server_monitor:
+    networks:
+      - server_net
     image: delivery-monitor:latest
     depends_on:
-      - broker
+      server_broker:
+        condition: service_healthy
     environment:
-      KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
+      KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
 
-  auth:
+  server_auth:
+    networks:
+      - server_net
     image: delivery-authentication:latest
     depends_on:
-      - monitor
+      - server_monitor
     volumes:
       - ./certs/secret_keystore.p12:/app/secret_keystore.p12:ro
     environment:
       KEYSTORE_PATH: '/app/secret_keystore.p12'
       KEYSTORE_PASSWORD: 'kiuw2ka7ahSeeTh2wieb6ohy1Xu3haj4'
-      KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
+      KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
 
-  comms:
+  server_comms:
+    hostname: server-com
+    networks:
+      - server_net
+      - comms_net
     image: delivery-communication:latest
     depends_on:
-      - monitor
+      - server_monitor
     environment:
-      KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
+      PORT: 9010
+      KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
       MESSAGES: 'ccu.DeliveryStatusRequest,ccu.NewTaskRequest'
-      SERVER_URI: '172.17.0.1:9011'
+  #      SERVER_URI: 'robot-com:9010'
 
-  fms:
-    image: delivery-fleet-manager:latest
+  server_fms:
+    networks:
+      - server_net
+    image: delivery-fms:latest
     ports:
-      - "9040:8888"
+      - "9040:9040"
     depends_on:
-      - monitor
-      - auth
-      - comms
+      - server_monitor
+      - server_comms
+      - server_auth
     environment:
-      KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
+      KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
+
+networks:
+  server_net:
+    driver: bridge
+  comms_net:
+    external: true

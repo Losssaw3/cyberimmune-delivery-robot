@@ -1,90 +1,112 @@
-version: '3.8'
+version: '3.9'
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
+  robot_zookeeper:
+    networks:
+      - robot_net
+    image: 'bitnami/zookeeper:latest'
     hostname: zookeeper
-    container_name: zookeeper
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+      - ALLOW_ANONYMOUS_LOGIN=yes
 
-  broker:
-    image: confluentinc/cp-server:7.3.0
+  robot_broker:
+    networks:
+      - robot_net
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9031:9031'
     hostname: broker
-    container_name: broker
-    depends_on:
-      - zookeeper
-    ports:
-      - "9031:9092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29000,PLAINTEXT_HOST://localhost:9031
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-
-  control-center:
-    image: confluentinc/cp-enterprise-control-center:7.3.0
-    hostname: control-center
-    container_name: control-center
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_LISTENERS=CLIENT://:29000,EXTERNAL://:9031
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://broker:29000,EXTERNAL://localhost:9031
     depends_on:
-      - broker
-    ports:
-      - "9021:9021"
-    environment:
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:29000'
-      CONTROL_CENTER_REPLICATION_FACTOR: 1
-      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
-      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
-      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-      PORT: 9021
+      - robot_zookeeper
+    healthcheck:
+      test: /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29000 --list
+      interval: 2s
+      start_period: 10s
+      timeout: 15s
+      retries: 100
 
-  monitor:
+  robot_kafka_ui:
+    networks:
+      - robot_net
+    image: 'provectuslabs/kafka-ui:latest'
+    ports:
+      - '9021:8080'
+    depends_on:
+      - robot_broker
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=broker:29000
+
+  robot_monitor:
+    networks:
+      - robot_net
     image: delivery-monitor:latest
     depends_on:
-      - broker
+      robot_broker:
+        condition: service_healthy
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
-  comms:
+  robot_comms:
+    hostname: robot-com
+    networks:
+      - robot_net
+      - comms_net
     image: delivery-communication:latest
     depends_on:
-      - monitor
+      - 'robot_monitor'
+    #    ports:
+    #      - '9011:9011'
     environment:
+      PORT: 9011
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
       MESSAGES: 'ccu.DeliveryStatusRequest,ccu.NewTaskRequest'
-      SERVER_URI: '172.17.0.1:9010'
+      SERVER_URI: 'server-com:9010'
 
-  hmi:
+  robot_hmi:
+    networks:
+      - robot_net
     image: delivery-hmi:latest
     ports:
       - "9041:8888"
     depends_on:
-      - monitor
+      - robot_monitor
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
-  motion:
+  robot_motion:
+    networks:
+      - robot_net
     image: delivery-motion:latest
     depends_on:
-      - monitor
+      - robot_monitor
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
-  odom:
+  robot_odom:
+    networks:
+      - robot_net
     image: delivery-odometer:latest
     depends_on:
-      - monitor
-      - motion
+      - robot_monitor
+      - robot_motion
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
-  location:
+  robot_location:
+    networks:
+      - robot_net
     image: delivery-location:latest
     depends_on:
-      - monitor
-      - odom
+      - robot_monitor
+      - robot_odom
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
       SPEED_TAMPERED_TRIGGER: 5
@@ -92,31 +114,38 @@ services:
       UPDATE_INTERVAL_SEC: 10
       SERVICES: 'odom'
 
-  sensors:
+  robot_sensors:
+    networks:
+      - robot_net
     image: delivery-sensors:latest
     depends_on:
-      - monitor
-      - location
+      - robot_monitor
+      - robot_location
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
-  locker:
+  robot_locker:
+    networks:
+      - robot_net
     image: delivery-locker:latest
     depends_on:
-      - monitor
+      - robot_monitor
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
-  central:
+  robot_central:
+    networks:
+      - robot_net
     image: delivery-central:latest
     restart: always
     depends_on:
-      - monitor
-      - comms
-      - motion
-      - location
-      - sensors
-      - locker
+      - robot_monitor
+      - robot_comms
+      - robot_motion
+      - robot_location
+      - robot_sensors
+      - robot_locker
+      - robot_hmi
     volumes:
       - ./certs/secret_keystore.p12:/app/secret_keystore.p12:ro
       - ./certs/client_sign_keystore.p12:/app/client_sign_keystore.p12:ro
@@ -126,3 +155,9 @@ services:
       AES_KS_PASS: 'kiuw2ka7ahSeeTh2wieb6ohy1Xu3haj4'
       SIGN_KS_PATH: '/app/client_sign_keystore.p12'
       SIGN_KS_PASS: 'uogh7noh4Ree8huZ9shae7vi6ohphohj'
+
+networks:
+  robot_net:
+    driver: bridge
+  comms_net:
+    external: true
