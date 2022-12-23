@@ -1,13 +1,13 @@
 package ru.bardinpetr.delivery.robot.odometer.hardware;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.msg.Unit;
-import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
-import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataReply;
-import ru.bardinpetr.delivery.libs.messages.msg.motion.GetMotionDataRequest;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.common.libs.messages.msg.motion.GetMotionDataReply;
+import ru.bardinpetr.delivery.common.libs.messages.msg.motion.GetMotionDataRequest;
 import ru.bardinpetr.delivery.robot.positioning_driver.IPositionService;
 
 import java.util.List;

@@ -1,24 +1,24 @@
 package ru.bardinpetr.delivery.robot.central;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerService;
-import ru.bardinpetr.delivery.libs.messages.msg.MessageRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.Unit;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatus;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryStatusRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryTask;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.NewTaskRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINValidationResponse;
-import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
-import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerDoorClosedRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.locker.LockerOpenRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectedRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.sensors.HumanDetectionConfigRequest;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerServiceBuilder;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerService;
+import ru.bardinpetr.delivery.common.libs.messages.msg.MessageRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryStatus;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryStatusRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryTask;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.NewTaskRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.hmi.PINEnterRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.hmi.PINValidationResponse;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.common.libs.messages.msg.locker.LockerDoorClosedRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.locker.LockerOpenRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.sensors.HumanDetectedRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.sensors.HumanDetectionConfigRequest;
 import ru.bardinpetr.delivery.robot.central.services.NavService;
 import ru.bardinpetr.delivery.robot.central.services.crypto.CoreCryptoService;
 
@@ -123,7 +123,7 @@ public class MainService {
             return false;
         }
 
-        sendFMSStatus(DeliveryStatus.LOCKER_OPENED);
+        setStatus(DeliveryStatus.LOCKER_OPENED);
 
         log.info("Opening locker...");
         producerService.sendMessage(
@@ -178,6 +178,7 @@ public class MainService {
     }
 
     private void setStatus(DeliveryStatus status) {
+        log.warn("Status changed to {}", status);
         currentStatus = status;
         sendFMSStatus(status);
     }

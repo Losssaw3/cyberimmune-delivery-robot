@@ -3,18 +3,17 @@ package ru.bardinpetr.delivery.backend.store;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
-import ru.bardinpetr.delivery.libs.crypto.SignatureCryptoService;
-import ru.bardinpetr.delivery.libs.crypto.keystore.KeystoreServiceSign;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryTask;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.InputDeliveryTask;
-import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.common.libs.crypto.SignatureCryptoService;
+import ru.bardinpetr.delivery.common.libs.crypto.keystore.KeystoreServiceSign;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryTask;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.InputDeliveryTask;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Properties;
 
 /**
  * This is just a demonstration of how a real web market should trigger delivery.
@@ -30,19 +29,16 @@ public class Main {
     private static HttpClient client;
     private static SignatureCryptoService signService;
 
-    public static void main(String[] args) throws IOException {
-        var props = new Properties();
-        try (var is = Main.class.getClassLoader().getResourceAsStream("config.properties")) {
-            props.load(is);
-        }
-
-        fmsUrl = props.getProperty("fms_url", "http://localhost:9040");
+    public static void main(String[] args) {
+        var env = System.getenv();
         client = HttpClient.newHttpClient();
+
+        fmsUrl = env.get("FMS_URL");
 
         signService = new SignatureCryptoService(
                 (new KeystoreServiceSign()).getPrivateFromKeystore(
-                        props.getProperty("keystore_path"),
-                        props.getProperty("keystore_pass")
+                        env.get("KS_PATH"),
+                        env.get("KS_PASS")
                 )
         );
 

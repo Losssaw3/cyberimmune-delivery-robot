@@ -1,13 +1,17 @@
 rootProject.name = "delivery"
 include(
-    "libs:crypto",
-    "libs:messages"
+    "common:libs:crypto",
+    "common:libs:messages"
 )
 include("monitor")
 include(
     "backend:authentication",
     "backend:store",
     "backend:fms"
+)
+include(
+    "common:monitor",
+    "common:communication"
 )
 include(
     "robot:hmi",
@@ -18,5 +22,4 @@ include(
     "robot:odometer",
     "robot:location",
     "robot:central",
-    "robot:communication"
 )

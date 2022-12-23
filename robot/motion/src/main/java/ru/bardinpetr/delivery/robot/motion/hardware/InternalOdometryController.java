@@ -1,7 +1,7 @@
 package ru.bardinpetr.delivery.robot.motion.hardware;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.robot.motion.hardware.models.MotorParams;
 
 import java.time.Duration;

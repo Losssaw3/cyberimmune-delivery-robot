@@ -2,7 +2,7 @@ package ru.bardinpetr.delivery.robot.location.aggregator;
 
 import lombok.Getter;
 import lombok.ToString;
-import ru.bardinpetr.delivery.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
 
 import java.time.Instant;
 import java.util.ArrayDeque;

@@ -1,8 +1,8 @@
 package ru.bardinpetr.delivery.robot.hmi;
 
-import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.CommonKafkaConfiguration;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.robot.hmi.interactors.http.HTTPUserInteractor;
 
 import static ru.bardinpetr.delivery.robot.hmi.MainService.SERVICE_NAME;

@@ -1,9 +1,9 @@
 package ru.bardinpetr.delivery.robot.central.services.crypto;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.crypto.SignatureCryptoService;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.DeliveryTask;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.InputDeliveryTask;
+import ru.bardinpetr.delivery.common.libs.crypto.SignatureCryptoService;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryTask;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.InputDeliveryTask;
 
 @Slf4j
 public class CoreCryptoService {

@@ -1,9 +1,9 @@
 package ru.bardinpetr.delivery.robot.odometer;
 
-import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.msg.Unit;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.CommonKafkaConfiguration;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.robot.odometer.hardware.MockHardwareOdometer;
 import ru.bardinpetr.delivery.robot.positioning_driver.HardwarePositioningService;
 

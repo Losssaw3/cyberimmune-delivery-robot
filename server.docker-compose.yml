@@ -60,8 +60,6 @@ services:
     image: delivery-authentication:latest
     depends_on:
       - server_monitor
-    volumes:
-      - ./certs/secret_keystore.p12:/app/secret_keystore.p12:ro
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
 
@@ -84,6 +82,7 @@ services:
       - server_net
       - web_net
     image: delivery-fms:latest
+    hostname: server-fms
     ports:
       - "9040:9040"
     depends_on:
@@ -96,12 +95,18 @@ services:
   server_store:
     networks:
       - web_net
+    restart: always
     image: delivery-store:latest
+    volumes:
+      - ./certs/server_sign_keystore.p12:/app/server_sign_keystore.p12:ro
     ports:
       - "9044:9044"
     depends_on:
       - server_fms
-
+    environment:
+      FMS_URL: "http://server-fms:9040"
+      KS_PATH: "server_sign_keystore.p12"
+      KS_PASS: "ahmai6oacaitioNg3requohk9OeHijoo"
 
 networks:
   web_net:

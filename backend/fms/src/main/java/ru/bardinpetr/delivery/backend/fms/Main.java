@@ -2,9 +2,9 @@ package ru.bardinpetr.delivery.backend.fms;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.backend.fms.server.FMSHTTPServer;
-import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.CommonKafkaConfiguration;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 
 import static ru.bardinpetr.delivery.backend.fms.MainService.SERVICE_NAME;
 

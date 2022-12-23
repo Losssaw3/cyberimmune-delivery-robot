@@ -1,13 +1,13 @@
 package ru.bardinpetr.delivery.robot.hmi;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.crypto.PINService;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
-import ru.bardinpetr.delivery.libs.messages.msg.Unit;
-import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINEnterRequest;
-import ru.bardinpetr.delivery.libs.messages.msg.hmi.PINValidationResponse;
+import ru.bardinpetr.delivery.common.libs.crypto.PINService;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaRequesterService;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
+import ru.bardinpetr.delivery.common.libs.messages.msg.hmi.PINEnterRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.hmi.PINValidationResponse;
 import ru.bardinpetr.delivery.robot.hmi.interactors.IUserInteractor;
 
 import java.time.LocalTime;

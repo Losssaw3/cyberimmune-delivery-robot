@@ -1,7 +1,7 @@
 package ru.bardinpetr.delivery.backend.authentication;
 
 
-import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.CommonKafkaConfiguration;
 
 import static ru.bardinpetr.delivery.backend.authentication.AuthenticationService.SERVICE_NAME;
 

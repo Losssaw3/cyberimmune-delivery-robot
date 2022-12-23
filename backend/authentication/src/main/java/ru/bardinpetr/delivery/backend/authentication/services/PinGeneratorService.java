@@ -2,7 +2,7 @@ package ru.bardinpetr.delivery.backend.authentication.services;
 
 import java.security.SecureRandom;
 
-import static ru.bardinpetr.delivery.libs.crypto.utils.RandomUtil.getRng;
+import static ru.bardinpetr.delivery.common.libs.crypto.utils.RandomUtil.getRng;
 
 public class PinGeneratorService {
     private final SecureRandom secureRandom = getRng();

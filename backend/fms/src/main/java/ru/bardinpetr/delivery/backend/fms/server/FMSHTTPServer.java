@@ -3,7 +3,7 @@ package ru.bardinpetr.delivery.backend.fms.server;
 import io.javalin.Javalin;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import ru.bardinpetr.delivery.libs.messages.msg.ccu.InputDeliveryTask;
+import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.InputDeliveryTask;
 
 import java.util.function.Function;
 

@@ -1,7 +1,7 @@
 package ru.bardinpetr.delivery.robot.central.services.crypto;
 
-import ru.bardinpetr.delivery.libs.crypto.SignatureCryptoService;
-import ru.bardinpetr.delivery.libs.crypto.keystore.KeystoreServiceSign;
+import ru.bardinpetr.delivery.common.libs.crypto.SignatureCryptoService;
+import ru.bardinpetr.delivery.common.libs.crypto.keystore.KeystoreServiceSign;
 
 public class CoreCryptoServiceFactory {
     public static CoreCryptoService getService(String signKeystorePath, String signKeystorePass) {

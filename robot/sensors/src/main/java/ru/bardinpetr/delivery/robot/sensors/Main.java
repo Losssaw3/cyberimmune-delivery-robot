@@ -1,8 +1,8 @@
 package ru.bardinpetr.delivery.robot.sensors;
 
-import ru.bardinpetr.delivery.libs.messages.kafka.CommonKafkaConfiguration;
-import ru.bardinpetr.delivery.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
-import ru.bardinpetr.delivery.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.CommonKafkaConfiguration;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
+import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.robot.sensors.hardware.PositioningHumanDetector;
 
 import static ru.bardinpetr.delivery.robot.sensors.MainService.SERVICE_NAME;

@@ -6,5 +6,5 @@ group = "ru.bardinpetr.delivery.robot"
 version = "1.0"
 
 dependencies {
-    implementation(project(":libs:messages"))
+    implementation(project(":common:libs:messages"))
 }

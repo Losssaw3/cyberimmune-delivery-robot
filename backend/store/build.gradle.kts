@@ -7,8 +7,8 @@ group = "ru.bardinpetr.delivery.backend"
 
 
 dependencies {
-    implementation(project(":libs:crypto"))
-    implementation(project(":libs:messages"))
+    implementation(project(":common:libs:crypto"))
+    implementation(project(":common:libs:messages"))
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.7.1")
     implementation("io.javalin:javalin:5.2.0")
