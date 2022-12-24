@@ -23,3 +23,6 @@ include(
     "robot:location",
     "robot:central",
 )
+include(
+    "e2e"
+)
