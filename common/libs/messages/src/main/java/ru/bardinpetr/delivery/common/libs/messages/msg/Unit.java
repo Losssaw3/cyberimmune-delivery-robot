@@ -10,7 +10,8 @@ public enum Unit {
     LOC("location"),
     MOTION("motion"),
     SENSORS("sensors"),
-    POS_ODOM("odom");
+    POS_ODOM("odom"),
+    MONITOR("monitor");
 
     private final String name;
 

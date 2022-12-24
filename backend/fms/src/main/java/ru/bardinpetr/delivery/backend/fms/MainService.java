@@ -118,14 +118,17 @@ public class MainService {
 
     private void onMessage(DeliveryStatusRequest request) {
         var senderIp = request.getSenderBridgeURL();
-        log.warn("Got msg from robot: {}", senderIp);
+        log.info("Got msg from robot: {}", senderIp);
 
         var robot =
                 robots
                         .values().stream()
                         .filter(i -> i.getRealIP().equals(senderIp))
                         .findFirst();
-        if (robot.isEmpty()) return;
+        if (robot.isEmpty()) {
+            log.warn("Got message for unknown robot: {}. Having {}", senderIp, robots);
+            return;
+        }
 
         var id = robot.get().getUrl();
         robots

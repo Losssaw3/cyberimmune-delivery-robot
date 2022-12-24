@@ -3,6 +3,7 @@ package ru.bardinpetr.delivery.common.monitor;
 import ru.bardinpetr.delivery.common.libs.messages.kafka.CommonKafkaConfiguration;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINResponse;
+import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.PINTestRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.DeliveryStatusRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.NewTaskRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.hmi.PINEnterRequest;
@@ -60,6 +61,12 @@ public class Main {
                         CreatePINResponse.class,
                         new ActionRulesBuilder()
                                 .allow(AUTH, FMS)
+                                .build()
+                )
+                .addRule(
+                        PINTestRequest.class,
+                        new ActionRulesBuilder()
+                                .allow(AUTH, AUTH)
                                 .build()
                 )
                 .addRule(

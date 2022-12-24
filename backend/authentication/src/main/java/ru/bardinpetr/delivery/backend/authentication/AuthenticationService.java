@@ -12,6 +12,7 @@ import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafk
 import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINResponse;
+import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.PINTestRequest;
 
 import java.util.Map;
 
@@ -48,6 +49,12 @@ public class AuthenticationService {
     private String createPin(String mobileDestination) {
         var pin = pinService.createPin();
         this.senderService.send(mobileDestination, pin);
+
+        this.producerService.sendMessage(
+                Unit.AUTH,
+                new PINTestRequest(pin)
+        ); // This is only for complete-system unit testing.
+
         return PINService.hashPin(pin);
     }
 

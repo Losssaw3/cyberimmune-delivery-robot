@@ -1,0 +1,12 @@
+# Register robot by URL in FMS
+GET http://0.0.0.0:9044/newRobot?url=robot-com:9011
+
+###
+
+# Create new task and automatically assign to first available robot
+GET http://0.0.0.0:9044/newTask?x=40&y=20
+
+###
+
+# Enter PIN code as customer
+GET http://0.0.0.0:9041/pin?code=748528
