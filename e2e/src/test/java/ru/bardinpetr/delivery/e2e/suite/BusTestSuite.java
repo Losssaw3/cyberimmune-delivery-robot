@@ -13,16 +13,17 @@ import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafk
 import ru.bardinpetr.delivery.common.libs.messages.msg.MessageRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class BusTestSuite extends Thread {
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
-    private final Map<String, TimedListener> listeners;
-    private final Map<String, Queue<ConsumerRecord<String, MessageRequest>>> lastMessages;
+    private final Map<String, TopicHistory> history;
 
     private final MonitoredKafkaProducerService monitoredProducer;
     private final KafkaTemplate<String, MessageRequest> classicProducer;
@@ -32,8 +33,7 @@ public class BusTestSuite extends Thread {
 
     public BusTestSuite(MonitoredKafkaConsumerFactory consumerFactory, MonitoredKafkaProducerFactory producerFactory, long backTimeSearchMillis) {
         this.backTimeSearchMillis = backTimeSearchMillis;
-        listeners = new HashMap<>();
-        lastMessages = new HashMap<>();
+        history = new HashMap<>();
 
         var containerProperties = new ContainerProperties(Pattern.compile("\\w+"));
         containerProperties.setMessageListener((MessageListener<String, MessageRequest>) this::onMessage);
@@ -52,84 +52,55 @@ public class BusTestSuite extends Thread {
         return Calendar.getInstance().getTimeInMillis();
     }
 
+    /**
+     * Each received message is stored in TopicHistory for each topic (receiver + msg type).
+     */
+    @SuppressWarnings("unchecked")
     private void onMessage(ConsumerRecord<String, MessageRequest> msg) {
-        var msgData = msg.value();
         var topic = msg.topic();
         var time = msg.timestamp();
 
         if (time < startupTimestamp) return;
 
-        var listener = listeners.get(topic);
-        if (listener == null || listener.fired) {
-            if ((millis() - time) < backTimeSearchMillis) {
-                lastMessages
-                        .putIfAbsent(topic, new ArrayDeque<>())
-                        .add(msg);
-            }
-            return;
-        }
-
-        log.info("MSG {}->{} of {} @ {}", msgData.getSender(), topic, msgData.getActionType(), time);
-
-        listener.future.complete(msgData);
-    }
-
-    private void clearHistory(Queue<ConsumerRecord<String, MessageRequest>> q) {
-        while (!q.isEmpty() && (millis() - Objects.requireNonNull(q.peek()).timestamp()) > backTimeSearchMillis)
-            q.remove();
+        history.putIfAbsent(topic, new TopicHistory<>());
+        var hist = history.get(topic);
+        hist.put(msg);
     }
 
     /**
-     * Wait specified time for specific message to be sent to selected topic by receiver
-     *
-     * @param msgType  type of message to listen for
-     * @param receiver topic unit prefix (unitName_actionName in kafka)
-     * @param timeout  timeout value. returns null if timeout
-     * @return CompletableFuture resolving to null if timeout else to received message
+     * Deletes all messages received from cache
      */
-    public CompletableFuture<MessageRequest> awaitMessage(Class<? extends MessageRequest> msgType,
-                                                          String receiver,
-                                                          int timeout, TimeUnit timeUnit) {
-        var future = new CompletableFuture<MessageRequest>();
+    public void flushHistory() {
+        history.clear();
+        log.info("history after clean: {}", history);
+    }
 
-        var topic = (receiver.equals(Unit.MONITOR.toString()) ?
-                Unit.MONITOR.toString() : MessageRequest.getTargetTopic(msgType, receiver));
+    /**
+     * Get reusable listener {@link HistoryListener} for messages of type {@code msgType} arriving for {@code receiver}.
+     *
+     * @param msgType  message type to listen for
+     * @param receiver receiving unit. topic looks like $receiver_$msgType.actionType
+     * @param timeout  timeout for underlying message waiting. returns null if exceeded.
+     * @param timeUnit timeout unit
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends MessageRequest> HistoryListener<T> awaitMessages(Class<T> msgType,
+                                                                       Unit receiver,
+                                                                       int timeout, TimeUnit timeUnit) {
+        var topic = MessageRequest.getTargetTopic(msgType, receiver.toString());
 
-        var history = lastMessages.get(topic);
-        if (history != null) {
-            clearHistory(history);
-            if (!history.isEmpty()) {
-                log.info("Found already received message {} fired before consumer registed", topic);
-                return CompletableFuture.completedFuture(history.remove().value());
-            }
-        }
-
-        listeners.put(topic, new TimedListener(future));
-
-        return future
-                .completeOnTimeout(null, timeout, timeUnit)
-                .thenApply(res -> {
-                    listeners.get(topic).fired = true;
-                    return res;
-                });
+        history.putIfAbsent(topic, new TopicHistory<T>());
+        var hist = history.get(topic);
+        return new HistoryListener<T>(hist, timeout, timeUnit);
     }
 
     public void produceUnmonitored(MessageRequest request) {
+        request.setRequestId(UUID.randomUUID().toString());
         classicProducer.send(request.getTargetTopic(), request.getActionType(), request);
     }
 
     @Override
     public void run() {
         container.start();
-    }
-
-    private static class TimedListener {
-        private final CompletableFuture<MessageRequest> future;
-        private boolean fired;
-
-        public TimedListener(CompletableFuture<MessageRequest> future) {
-            this.future = future;
-            this.fired = false;
-        }
     }
 }
