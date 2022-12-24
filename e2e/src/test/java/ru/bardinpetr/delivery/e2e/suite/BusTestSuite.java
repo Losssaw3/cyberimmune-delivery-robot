@@ -11,24 +11,29 @@ import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafk
 import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerFactory;
 import ru.bardinpetr.delivery.common.libs.messages.kafka.producers.MonitoredKafkaProducerService;
 import ru.bardinpetr.delivery.common.libs.messages.msg.MessageRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class BusTestSuite extends Thread {
-
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
-    private final Map<Class<? extends MessageRequest>, Map<String, TimedListener>> listeners;
+    private final Map<String, TimedListener> listeners;
+    private final Map<String, Queue<ConsumerRecord<String, MessageRequest>>> lastMessages;
+
     private final MonitoredKafkaProducerService monitoredProducer;
     private final KafkaTemplate<String, MessageRequest> classicProducer;
 
-    public BusTestSuite(MonitoredKafkaConsumerFactory consumerFactory, MonitoredKafkaProducerFactory producerFactory) {
+    private final long startupTimestamp;
+    private final long backTimeSearchMillis;
+
+    public BusTestSuite(MonitoredKafkaConsumerFactory consumerFactory, MonitoredKafkaProducerFactory producerFactory, long backTimeSearchMillis) {
+        this.backTimeSearchMillis = backTimeSearchMillis;
         listeners = new HashMap<>();
+        lastMessages = new HashMap<>();
 
         var containerProperties = new ContainerProperties(Pattern.compile("\\w+"));
         containerProperties.setMessageListener((MessageListener<String, MessageRequest>) this::onMessage);
@@ -39,23 +44,39 @@ public class BusTestSuite extends Thread {
                 (String) producerFactory.getConfigurationProperties().get(CommonClientConfigs.GROUP_ID_CONFIG),
                 producerFactory);
         classicProducer = new KafkaTemplate<>(producerFactory);
+
+        startupTimestamp = millis();
+    }
+
+    public static long millis() {
+        return Calendar.getInstance().getTimeInMillis();
     }
 
     private void onMessage(ConsumerRecord<String, MessageRequest> msg) {
         var msgData = msg.value();
+        var topic = msg.topic();
         var time = msg.timestamp();
-        var recipient = msgData.getRecipient();
 
-        var futures = listeners.get(msgData.getClass());
-        if (futures == null) return;
+        if (time < startupTimestamp) return;
 
-        var listener = futures.get(recipient);
-        if (listener == null || listener.timestamp > time) return;
+        var listener = listeners.get(topic);
+        if (listener == null || listener.fired) {
+            if ((millis() - time) < backTimeSearchMillis) {
+                lastMessages
+                        .putIfAbsent(topic, new ArrayDeque<>())
+                        .add(msg);
+            }
+            return;
+        }
 
-        log.info("MSG {}->{} of {} @ {} ", msgData.getSender(), recipient, msgData.getActionType(), time);
+        log.info("MSG {}->{} of {} @ {}", msgData.getSender(), topic, msgData.getActionType(), time);
 
         listener.future.complete(msgData);
-        futures.remove(recipient);
+    }
+
+    private void clearHistory(Queue<ConsumerRecord<String, MessageRequest>> q) {
+        while (!q.isEmpty() && (millis() - Objects.requireNonNull(q.peek()).timestamp()) > backTimeSearchMillis)
+            q.remove();
     }
 
     /**
@@ -71,10 +92,26 @@ public class BusTestSuite extends Thread {
                                                           int timeout, TimeUnit timeUnit) {
         var future = new CompletableFuture<MessageRequest>();
 
-        if (!listeners.containsKey(msgType)) listeners.put(msgType, new HashMap<>());
-        listeners.get(msgType).put(receiver, new TimedListener(future));
+        var topic = (receiver.equals(Unit.MONITOR.toString()) ?
+                Unit.MONITOR.toString() : MessageRequest.getTargetTopic(msgType, receiver));
 
-        return future.completeOnTimeout(null, timeout, timeUnit);
+        var history = lastMessages.get(topic);
+        if (history != null) {
+            clearHistory(history);
+            if (!history.isEmpty()) {
+                log.info("Found already received message {} fired before consumer registed", topic);
+                return CompletableFuture.completedFuture(history.remove().value());
+            }
+        }
+
+        listeners.put(topic, new TimedListener(future));
+
+        return future
+                .completeOnTimeout(null, timeout, timeUnit)
+                .thenApply(res -> {
+                    listeners.get(topic).fired = true;
+                    return res;
+                });
     }
 
     public void produceUnmonitored(MessageRequest request) {
@@ -88,11 +125,11 @@ public class BusTestSuite extends Thread {
 
     private static class TimedListener {
         private final CompletableFuture<MessageRequest> future;
-        private final long timestamp;
+        private boolean fired;
 
         public TimedListener(CompletableFuture<MessageRequest> future) {
-            timestamp = Instant.now().getEpochSecond();
             this.future = future;
+            this.fired = false;
         }
     }
 }

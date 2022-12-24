@@ -36,31 +36,32 @@ public class FullTest {
         var robotParams = CommonKafkaConfiguration.getKafkaGlobalParams(ROBOT_BROKER_URI, "TEST-MB-R");
         robotBusSuite = new BusTestSuite(
                 new MonitoredKafkaConsumerFactory(robotParams),
-                new MonitoredKafkaProducerFactory(robotParams)
-        );
+                new MonitoredKafkaProducerFactory(robotParams),
+                2000);
         robotBusSuite.start();
 
         var serverParams = CommonKafkaConfiguration.getKafkaGlobalParams(SERVER_BROKER_URI, "TEST-MB-S");
         serverBusSuite = new BusTestSuite(
                 new MonitoredKafkaConsumerFactory(serverParams),
-                new MonitoredKafkaProducerFactory(serverParams)
-        );
+                new MonitoredKafkaProducerFactory(serverParams),
+                2000);
         serverBusSuite.start();
     }
 
     @BeforeAll
     static void setup() throws InterruptedException {
         log.warn("Docker-compose for robot and server should be started manually!");
-        Thread.sleep(20000);
     }
 
-    @DisplayName("Normal actions according to business model should result in successful delivery completion")
+    @DisplayName("Normal actions according to business-process should result in delivery being started")
     @Test
     @Order(0)
     void startDelivery() throws ExecutionException, InterruptedException {
-        log.info("Sending new task");
+        log.info("Waiting kafka");
+        Thread.sleep(40000);
 
-        // Create robot
+        log.info("Starting sending new task");
+
         APIRequests.createRobot(SERVER_STORE_URI, ROBOT_COMM_URI);
 
         // Send task to web market
@@ -69,16 +70,16 @@ public class FullTest {
 
         log.info("Waiting for task to be processed");
 
-        // Wait for task to be processed by FMS and sent to robot
+        // Prepare to wait for task to be processed by FMS and sent to robot
         var isPin = serverBusSuite.awaitMessage(
                 PINTestRequest.class,
                 Unit.AUTH.toString(),
-                30, TimeUnit.SECONDS
+                30, TimeUnit.MINUTES
         );
         var isSent = serverBusSuite.awaitMessage(
                 NewTaskRequest.class,
                 Unit.COMM.toString(),
-                30, TimeUnit.SECONDS
+                30, TimeUnit.MINUTES
         );
 
         var pinResp = isPin.get();
