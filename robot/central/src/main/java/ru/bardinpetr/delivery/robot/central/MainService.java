@@ -26,7 +26,7 @@ import ru.bardinpetr.delivery.robot.central.services.crypto.CoreCryptoService;
 public class MainService {
 
     public static final String SERVICE_NAME = Unit.CCU.toString();
-
+    private static final int PIN_MAX_ENTER_COUNT = 5;
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
 
@@ -35,6 +35,8 @@ public class MainService {
     private final Position home;
     private DeliveryStatus currentStatus = DeliveryStatus.IDLE;
     private DeliveryTask currentTask;
+
+    private int pinEnterCount = 0;
 
     public MainService(MonitoredKafkaConsumerFactory consumerFactory,
                        MonitoredKafkaProducerFactory producerFactory,
@@ -80,6 +82,7 @@ public class MainService {
         setStatus(DeliveryStatus.RUNNING);
 
         currentTask = task;
+        pinEnterCount = 0;
 
         log.info("Initiating navigation to {}", task.getPosition());
         navService.setTarget(task.getPosition());
@@ -119,7 +122,13 @@ public class MainService {
 
         if (!valid) {
             log.error("Invalid PIN");
-            sendFMSStatus(DeliveryStatus.PIN_INVALID);
+            pinEnterCount++;
+            if (pinEnterCount > PIN_MAX_ENTER_COUNT) {
+                setStatus(DeliveryStatus.PIN_INVALID);
+                onStartReturnHome(null);
+            } else {
+                sendFMSStatus(DeliveryStatus.PIN_INVALID);
+            }
             return false;
         }
 
@@ -150,8 +159,8 @@ public class MainService {
      * When door of robot locker is closed by the user, robot should return to the warehouse (starts nav service).
      * Triggered by Locker Unit.
      */
-    private void onStartReturnHome(LockerDoorClosedRequest request) {
-        if (currentStatus != DeliveryStatus.LOCKER_OPENED) return;
+    private void onStartReturnHome(LockerDoorClosedRequest ignored) {
+        if (currentStatus != DeliveryStatus.LOCKER_OPENED && currentStatus != DeliveryStatus.PIN_INVALID) return;
 
         log.info("Locker closed. Returning home");
         setStatus(DeliveryStatus.RETURNING);
