@@ -11,6 +11,8 @@ import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.*;
 import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
 import ru.bardinpetr.delivery.common.libs.messages.msg.location.PositionReply;
 import ru.bardinpetr.delivery.common.libs.messages.msg.location.PositionRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.locker.LockerDoorClosedRequest;
+import ru.bardinpetr.delivery.common.libs.messages.msg.locker.LockerOpenRequest;
 import ru.bardinpetr.delivery.e2e.interactors.APIRequests;
 import ru.bardinpetr.delivery.e2e.suite.BusTestSuite;
 
@@ -31,10 +33,12 @@ public class FullTest {
     private static final String ROBOT_COMM_URI = "robot-com:9011";
     private static final String SERVER_BROKER_URI = "localhost:9030";
     private static final String SERVER_STORE_URI = "http://localhost:9044";
+    private static final String HMI_URI = "http://localhost:9041";
 
     private BusTestSuite robotBusSuite;
     private BusTestSuite serverBusSuite;
     private Position requestedPosition;
+    private String requestedPin;
 
     @BeforeAll
     void setup() throws InterruptedException {
@@ -109,21 +113,21 @@ public class FullTest {
         APIRequests.createRobot(SERVER_STORE_URI, ROBOT_COMM_URI);
 
         // Send task to web market
-        var rnd = new Random().ints(2, 100, 500).toArray();
+        var rnd = new Random().ints(2, 100, 200).toArray();
         requestedPosition = new Position(rnd[0], rnd[1]);
         APIRequests.createTask(SERVER_STORE_URI, requestedPosition.getX(), requestedPosition.getY());
 
         log.info("Waiting for task to be processed");
 
         // Check if pin was issued
-        var pin = serverBusSuite
+        requestedPin = serverBusSuite
                 .awaitMessages(
                         PINTestRequest.class, Unit.AUTH,
                         30, TimeUnit.SECONDS
                 )
                 .assertArrived("PIN should be generated for task")
                 .getPin();
-        log.info("Got pin: {}", pin);
+        log.info("Got pin: {}", requestedPin);
 
         // Check if task was sent from server side
         serverBusSuite
@@ -192,8 +196,29 @@ public class FullTest {
         log.info("SCENARIO 5 PASSED");
     }
 
-    @DisplayName("Once delivery started robot should arrive to the destination")
+    @DisplayName("Locker could not be openable until reach destination")
     @Order(3)
+    @Test
+    void lockerNoOpenTest() throws ExecutionException, InterruptedException {
+        log.info("[START] locker try open test");
+        flush();
+
+        log.info("Trying to enter valid PIN");
+
+        APIRequests.submitPIN(HMI_URI, requestedPin);
+
+        robotBusSuite
+                .awaitMessages(
+                        LockerOpenRequest.class, Unit.LOCKER,
+                        15, TimeUnit.SECONDS
+                )
+                .assertNotArrived("Locker could not be opened not in destination point");
+
+        log.info("SCENARIO 12 PASSED");
+    }
+
+    @DisplayName("Once delivery started robot should arrive to the destination")
+    @Order(4)
     @Test
     void deliveryProcessTest() throws ExecutionException, InterruptedException {
         log.info("[START] destination test");
@@ -241,7 +266,7 @@ public class FullTest {
         req.setRecipient(Unit.LOC.toString());
         robotBusSuite.produceUnmonitored(req);
 
-        var posRequest = robotBusSuite
+        robotBusSuite
                 .awaitMessages(
                         PositionReply.class, Unit.CCU,
                         10, TimeUnit.SECONDS
@@ -273,5 +298,110 @@ public class FullTest {
         log.info("SCENARIO 11 PASSED");
     }
 
+    @DisplayName("Locker should be openable with valid PIN")
+    @Order(5)
+    @Test
+    void lockerTest() throws ExecutionException, InterruptedException {
+        log.info("[START] locker normal open test");
+        flush();
 
+        log.info("Trying to enter invalid PIN");
+        APIRequests.submitPIN(HMI_URI, "000000");
+
+        robotBusSuite
+                .awaitMessages(
+                        LockerOpenRequest.class, Unit.LOCKER,
+                        15, TimeUnit.SECONDS
+                )
+                .assertNotArrived("Locker could not be opened with invalid PIN");
+
+        flush();
+
+        log.info("Trying to enter valid PIN");
+        APIRequests.submitPIN(HMI_URI, requestedPin);
+
+        robotBusSuite
+                .awaitMessages(
+                        LockerOpenRequest.class, Unit.LOCKER,
+                        30, TimeUnit.SECONDS
+                )
+                .assertArrived("Locker must open in destination point by valid PIN");
+
+        robotBusSuite
+                .awaitMessages(
+                        DeliveryStatusRequest.class, Unit.COMM,
+                        30, TimeUnit.SECONDS
+                )
+                .assertArrivedValidated(
+                        i -> assertEquals(DeliveryStatus.LOCKER_OPENED, i.getStatus()),
+                        "Robot should open locker and notify",
+                        "Robot should open locker and notify"
+                );
+
+        log.info("Waiting for locker to be closed");
+
+        flush();
+
+        robotBusSuite
+                .awaitMessages(
+                        LockerDoorClosedRequest.class, Unit.CCU,
+                        5, TimeUnit.MINUTES
+                )
+                .assertArrived("Locker must notify on door closed");
+
+        log.info("Checking if robot started returning");
+
+        serverBusSuite
+                .awaitMessages(
+                        DeliveryStatusRequest.class, Unit.FMS,
+                        30, TimeUnit.SECONDS
+                )
+                .assertArrivedValidated(
+                        i -> assertEquals(DeliveryStatus.RETURNING, i.getStatus()),
+                        "Robot should be able to return home",
+                        "Robot should immediately after locker door is closed start returning home"
+                );
+    }
+
+    @DisplayName("After delivery robot should return home")
+    @Order(6)
+    @Test
+    void returnTest() throws ExecutionException, InterruptedException {
+        log.info("[START] return test");
+        flush();
+
+        log.info("Waiting for robot to return");
+        serverBusSuite
+                .awaitMessages(
+                        DeliveryStatusRequest.class, Unit.FMS,
+                        5, TimeUnit.MINUTES
+                )
+                .assertArrivedValidated(
+                        i -> assertEquals(DeliveryStatus.ENDED_OK, i.getStatus()),
+                        "After returning home, robot should notify FMS of IDLE state",
+                        "After returning home, robot should notify FMS of IDLE state"
+                );
+
+        log.info("Arrived. Trying to get real position");
+        var req = new PositionRequest();
+        req.setSender(Unit.CCU.toString());
+        req.setRecipient(Unit.LOC.toString());
+        robotBusSuite.produceUnmonitored(req);
+
+        robotBusSuite
+                .awaitMessages(
+                        PositionReply.class, Unit.CCU,
+                        10, TimeUnit.SECONDS
+                )
+                .doTakeLast()
+                .assertArrivedThat(
+                        i -> {
+                            log.info("Arrived at: {}; Required: 0.0,0.0", i.getPosition());
+                            return i.getPosition().distance(new Position(0, 0)) < DIST_THRESH;
+                        },
+                        "Robot's location service do not reply with location on request",
+                        "Robot arrived not at destination"
+                );
+        log.info("Returned OK");
+    }
 }

@@ -36,8 +36,9 @@ public class TopicHistory<T> {
             return CompletableFuture.completedFuture(queue.remove().value());
 
         isConsumerWaiting = true;
-        listener = new CompletableFuture<>();
-        return listener;
+        var newListener = new CompletableFuture<T>();
+        listener = newListener;
+        return newListener;
     }
 
     /**
