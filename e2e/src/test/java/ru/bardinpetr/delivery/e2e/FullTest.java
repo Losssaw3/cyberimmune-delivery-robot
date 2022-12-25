@@ -9,9 +9,12 @@ import ru.bardinpetr.delivery.common.libs.messages.msg.Unit;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.PINTestRequest;
 import ru.bardinpetr.delivery.common.libs.messages.msg.ccu.*;
 import ru.bardinpetr.delivery.common.libs.messages.msg.location.Position;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.PositionReply;
+import ru.bardinpetr.delivery.common.libs.messages.msg.location.PositionRequest;
 import ru.bardinpetr.delivery.e2e.interactors.APIRequests;
 import ru.bardinpetr.delivery.e2e.suite.BusTestSuite;
 
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FullTest {
+
+    private static final double DIST_THRESH = 20;
 
     private static final String ROBOT_BROKER_URI = "localhost:9031";
     private static final String ROBOT_COMM_URI = "robot-com:9011";
@@ -88,7 +93,7 @@ public class FullTest {
                 );
 
         log.info("Robot did not start invalid task - ok");
-        log.info("SCENARIO #TODO PASSED");
+        log.info("SCENARIO 1,2 PASSED");
     }
 
     @DisplayName("For valid task delivery should start")
@@ -104,7 +109,8 @@ public class FullTest {
         APIRequests.createRobot(SERVER_STORE_URI, ROBOT_COMM_URI);
 
         // Send task to web market
-        requestedPosition = new Position(500, 400);
+        var rnd = new Random().ints(2, 100, 500).toArray();
+        requestedPosition = new Position(rnd[0], rnd[1]);
         APIRequests.createTask(SERVER_STORE_URI, requestedPosition.getX(), requestedPosition.getY());
 
         log.info("Waiting for task to be processed");
@@ -183,6 +189,89 @@ public class FullTest {
                 );
 
         log.info("Robot did not start invalid task - ok");
-        log.info("SCENARIO #TODO PASSED");
+        log.info("SCENARIO 5 PASSED");
     }
+
+    @DisplayName("Once delivery started robot should arrive to the destination")
+    @Order(3)
+    @Test
+    void deliveryProcessTest() throws ExecutionException, InterruptedException {
+        log.info("[START] destination test");
+        flush();
+
+        // Simulate malfunctioning/tampering of one location driver
+        // As all location is request-reply, the only way to do it from here
+        // is to intercept the request, copy ID, and then send many replies
+        // with hope that one of them would arrive faster than real one.
+        log.info("starting [mitm] on position driver ODOM2");
+        var realRequest = robotBusSuite
+                .awaitMessages(
+                        PositionRequest.class, Unit.ODOM2,
+                        30, TimeUnit.SECONDS
+                )
+                .assertArrived("When in progress of delivery, all position providers should be frequently pooled");
+        log.info("[mitm] Got original message to odom2: ID{}", realRequest.getRequestId());
+
+        var invalidMsg = new PositionReply(new Position(12345, 12345), 1);
+        invalidMsg.setSender("odom2");
+        invalidMsg.setRecipient(Unit.LOC.toString());
+        invalidMsg.setRequestId("reply-%s".formatted(realRequest.getRequestId()));
+
+        for (int i = 0; i < 100; i++)
+            robotBusSuite.produceUnmonitoredNoID(invalidMsg);
+
+        log.info("[mitm] sent invalid replies to Location Aggregator and hope it would not die");
+
+        log.info("Waiting for robot to arrive");
+        robotBusSuite
+                .awaitMessages(
+                        DeliveryStatusRequest.class, Unit.COMM,
+                        3, TimeUnit.MINUTES
+                )
+                .assertArrivedValidated(
+                        i -> assertEquals(DeliveryStatus.ARRIVED_TO_CUSTOMER, i.getStatus()),
+                        "Robot should be able to reach destination and notify of it",
+                        "Robot should be able to reach destination and notify of it"
+                );
+
+        // To get the latest position we need to trigger request on behalf of some service and then intercept response for it
+        log.info("Arrived. Trying to get real position");
+        var req = new PositionRequest();
+        req.setSender(Unit.CCU.toString());
+        req.setRecipient(Unit.LOC.toString());
+        robotBusSuite.produceUnmonitored(req);
+
+        var posRequest = robotBusSuite
+                .awaitMessages(
+                        PositionReply.class, Unit.CCU,
+                        10, TimeUnit.SECONDS
+                )
+                .doTakeLast()
+                .assertArrivedThat(
+                        i -> {
+                            log.info("Arrived at: {}; Required: {}", i.getPosition(), requestedPosition);
+                            return i.getPosition().distance(requestedPosition) < DIST_THRESH;
+                        },
+                        "Robot's location service do not reply with location on request",
+                        "Robot arrived not at destination"
+                );
+
+        log.info("Robot arrived ok");
+        log.info("Waiting for user to show up");
+        robotBusSuite
+                .awaitMessages(
+                        DeliveryStatusRequest.class, Unit.COMM,
+                        3, TimeUnit.MINUTES
+                )
+                .assertArrivedValidated(
+                        i -> assertEquals(DeliveryStatus.HUMAN_DETECTED, i.getStatus()),
+                        "Robot should notify of user presence",
+                        "User presence wasn't established however state illegally changed"
+                );
+        log.info("User came to the robot");
+
+        log.info("SCENARIO 11 PASSED");
+    }
+
+
 }
