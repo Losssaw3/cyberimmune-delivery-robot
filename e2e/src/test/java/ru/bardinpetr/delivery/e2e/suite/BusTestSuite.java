@@ -20,6 +20,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+/**
+ * Library for executing low-level commands on messagebus ignoring any security rules.
+ * ATTENTION: NO KAFKA ACL SHOULD BE SET. Methods in this library should have access to subscribing and publishing to ANY topic.
+ */
 @Slf4j
 public class BusTestSuite extends Thread {
     private final ConcurrentMessageListenerContainer<String, MessageRequest> container;
@@ -72,7 +76,6 @@ public class BusTestSuite extends Thread {
      */
     public void flushHistory() {
         history.clear();
-        log.info("history after clean: {}", history);
     }
 
     /**
@@ -94,8 +97,13 @@ public class BusTestSuite extends Thread {
         return new HistoryListener<T>(hist, timeout, timeUnit);
     }
 
-    public void produceUnmonitored(MessageRequest request) {
+    public String produceUnmonitored(MessageRequest request) {
         request.setRequestId(UUID.randomUUID().toString());
+        produceUnmonitoredNoID(request);
+        return request.getRequestId();
+    }
+
+    public void produceUnmonitoredNoID(MessageRequest request) {
         classicProducer.send(request.getTargetTopic(), request.getActionType(), request);
     }
 

@@ -15,6 +15,7 @@ public class HistoryListener<T> {
     private final TopicHistory<T> hist;
     private final TimeUnit timeUnit;
     private final int timeout;
+    private boolean isTakeEarliest = true;
 
     public HistoryListener(TopicHistory<T> history, int timeout, TimeUnit timeUnit) {
         this.hist = history;
@@ -27,20 +28,35 @@ public class HistoryListener<T> {
      *
      * @return future resolving to message or null on timeout
      */
-    public CompletableFuture<T> takeFirst() {
-        return hist
-                .takeFirst()
+    private CompletableFuture<T> take() {
+        return (isTakeEarliest ? hist.takeFirst() : hist.takeLast())
                 .completeOnTimeout(null, timeout, timeUnit);
     }
 
     /**
-     * Tries to do takeFirst() and asserts that timeout was not reached
+     * Set all commands depending on take() to use last element in queue
+     */
+    public HistoryListener<T> doTakeLast() {
+        isTakeEarliest = false;
+        return this;
+    }
+
+    /**
+     * (default) Set all commands depending on take() to use first element in queue
+     */
+    public HistoryListener<T> doTakeFirst() {
+        isTakeEarliest = true;
+        return this;
+    }
+
+    /**
+     * Tries to do takeFirst() (or takeLast if used) and asserts that timeout was not reached
      *
      * @param msg assert log message
      * @return if exists, the message received
      */
     public T assertArrived(String msg) throws ExecutionException, InterruptedException {
-        var res = takeFirst().get();
+        var res = take().get();
         Assertions.assertNotNull(res, msg);
         log.debug("took from queue: {} {} when {}", res, ((MessageRequest) res).getTargetTopic(), hist.toString());
         return res;
@@ -52,7 +68,7 @@ public class HistoryListener<T> {
      * @param msg assert log message
      */
     public void assertNotArrived(String msg) throws ExecutionException, InterruptedException {
-        Assertions.assertNull(takeFirst().get(), msg);
+        Assertions.assertNull(take().get(), msg);
     }
 
     /**

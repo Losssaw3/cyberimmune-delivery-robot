@@ -25,12 +25,30 @@ public class TopicHistory<T> {
         queue.add(msg);
     }
 
+    /**
+     * Takes earlist message from queue, if no elements - waits for new
+     */
     public CompletableFuture<T> takeFirst() {
         if (isConsumerWaiting)
             throw new RuntimeException("It is not intended to watch TopicHistory changes from more than one point.");
 
         if (!queue.isEmpty())
             return CompletableFuture.completedFuture(queue.remove().value());
+
+        isConsumerWaiting = true;
+        listener = new CompletableFuture<>();
+        return listener;
+    }
+
+    /**
+     * Forces the history service to wait for new message instead of reading from queue.
+     * Queue is cleared to prevent misunderstanding as in this library the intended use is sequential
+     */
+    public CompletableFuture<T> takeLast() {
+        if (isConsumerWaiting)
+            throw new RuntimeException("It is not intended to watch TopicHistory changes from more than one point.");
+
+        queue.clear();
 
         isConsumerWaiting = true;
         listener = new CompletableFuture<>();
