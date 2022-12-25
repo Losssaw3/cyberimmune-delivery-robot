@@ -100,6 +100,17 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
 
+  robot_odom2:
+    networks:
+      - robot_net
+    image: delivery-odometer:latest
+    depends_on:
+      - robot_monitor
+      - robot_motion
+    environment:
+      SERVICE_NAME: 'odom2'
+      KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
+
   robot_location:
     networks:
       - robot_net
@@ -107,12 +118,13 @@ services:
     depends_on:
       - robot_monitor
       - robot_odom
+      - robot_odom2
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
       SPEED_TAMPERED_TRIGGER: 5
       DISTANCE_TAMPERED_TRIGGER: 50
       UPDATE_INTERVAL_SEC: 10
-      SERVICES: 'odom'
+      SERVICES: 'odom,odom2'
 
   robot_sensors:
     networks:

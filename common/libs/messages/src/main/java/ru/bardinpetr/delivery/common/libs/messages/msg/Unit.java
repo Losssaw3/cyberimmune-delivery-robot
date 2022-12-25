@@ -11,7 +11,7 @@ public enum Unit {
     MOTION("motion"),
     SENSORS("sensors"),
     POS_ODOM("odom"),
-    MONITOR("monitor");
+    MONITOR("monitor"), ODOM2("odom2");
 
     private final String name;
 

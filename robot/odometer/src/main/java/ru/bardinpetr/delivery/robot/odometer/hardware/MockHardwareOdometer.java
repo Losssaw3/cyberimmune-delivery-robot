@@ -20,11 +20,12 @@ public class MockHardwareOdometer extends Thread implements IPositionService {
 
     private final MonitoredKafkaRequesterService kafka;
 
-    public MockHardwareOdometer(MonitoredKafkaConsumerFactory consumerFactory,
+    public MockHardwareOdometer(String name,
+                                MonitoredKafkaConsumerFactory consumerFactory,
                                 MonitoredKafkaProducerFactory producerFactory) {
 
         kafka = new MonitoredKafkaRequesterService(
-                Unit.POS_ODOM.toString(),
+                name,
                 List.of(GetMotionDataReply.class),
                 producerFactory,
                 consumerFactory
