@@ -1,0 +1,22 @@
+name: delivery
+root: .
+
+pre_window: tmux set-option mouse on
+
+windows:
+  - main:
+      layout: even-vertical
+      panes:
+        - ./compose.sh logs --follow server_fms server_auth server_comms
+        - ./compose.sh logs --follow --tail 100 server_monitor
+        - ./compose.sh logs --follow robot_central robot_comms
+        - ./compose.sh logs --follow --tail 100 robot_monitor
+  - robot:
+      layout: tiled
+      panes:
+        - ./compose.sh logs --follow robot_hmi
+        - ./compose.sh logs --follow robot_locker
+        - ./compose.sh logs --follow robot_sensors
+        - ./compose.sh logs --follow robot_motion
+        - ./compose.sh logs --follow robot_odom
+        - ./compose.sh logs --follow robot_location

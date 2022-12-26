@@ -9,4 +9,4 @@ GET http://0.0.0.0:9044/newTask?x=40&y=20
 ###
 
 # Enter PIN code as customer
-GET http://0.0.0.0:9041/pin?code=748528
+GET http://0.0.0.0:9041/pin?code=912083
