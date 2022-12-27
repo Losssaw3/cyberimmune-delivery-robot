@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class RuleValidatorBuilder {
     private final Map<Class<? extends MessageRequest>, ActionRules> rules = new HashMap<>();
-    private AllowMode defaultMode = AllowMode.ALLOW;
+    private AllowMode defaultMode = AllowMode.DENY;
 
     public RuleValidatorBuilder addRule(Class<? extends MessageRequest> msg, ActionRules rules) {
         this.rules.put(msg, rules);

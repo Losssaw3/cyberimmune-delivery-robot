@@ -73,12 +73,16 @@ public class Main {
                         DeliveryStatusRequest.class,
                         new ActionRulesBuilder()
                                 .allow(CCU, FMS)
+                                .allow(CCU, COMM)
+                                .allow(COMM, FMS)
                                 .build()
                 )
                 .addRule(
                         NewTaskRequest.class,
                         new ActionRulesBuilder()
                                 .allow(FMS, CCU)
+                                .allow(COMM, CCU)
+                                .allow(FMS, COMM)
                                 .build()
                 )
                 .addRule(
