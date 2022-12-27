@@ -19,7 +19,7 @@ User    -> STOR:      new order
 
 WH      -> STOR:     new delivery request
 activate FMS
-STOR    -> FMS
+STOR    -> FMS:     signed delivery task
 activate AS
 FMS     -> AS:      create PIN
 AS      -> User:    plain PIN
@@ -31,17 +31,16 @@ activate CCU
 
 CCU    --> FMS:      delivery started
 
-CCU     -> CCU:     decrypt PIN
 CCU     -> CCU:     validate address signature
-opt PIN decryption failed or adderess signature invalid
+opt task invalid OR adderess signature invalid
 CCU    --> FMS:      unable to start task
 end opt
 
 loop go to user until destination reached
 
-MCU     -> OPD:      odometry
-OPD     -> PU:       position
-PU      <-> CCU:     current position
+MCU     <-> OPD:      odometry request & data reply
+OPD     <-> PU:       position request & data reply
+PU      <-> CCU:      position request & data reply
 CCU     -> MCU:      target driving\n speed & direction
 MCU     -> MCU:       apply restrictions
 
@@ -51,8 +50,8 @@ end
 CCU     -> MCU:     stop motors
 
 
-loop
-PU      -> SU:      current position
+loop unill find human
+PU      <-> SU:      current position request & data reply
 end
 
 SU      -> CCU:     human detected
@@ -60,9 +59,13 @@ activate CCU #DDDDDD
 
 
 loop until code valid or attempts count ended
-User    -> HMI:     enter PIN
-HMI     -> CCU:     access PIN
+User    -> HMI:     plain PIN
+activate HMI
+
+HMI     -> CCU:     hashed PIN
 CCU     -> CCU:     check PIN
+CCU     --> HMI:     PIN status
+deactivate HMI
 end
 
 alt Valid PIN supplied
@@ -82,10 +85,11 @@ deactivate CCU
 end
 
 loop go to warehouse until destination reached
-MCU     -> OPD:      odometry
-OPD     -> PU:       position
-PU      <-> CCU:     current position
+MCU     <-> OPD:      odometry request & data reply
+OPD     <-> PU:       position request & data reply
+PU      <-> CCU:      position request & data reply
 CCU     -> MCU:      target driving\n speed & direction
+MCU     -> MCU:       apply restrictions
 end
 
 CCU     -> MCU:     stop motors

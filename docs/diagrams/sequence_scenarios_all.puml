@@ -11,8 +11,8 @@ participant "Central control\n unit" as CCU
 participant "Motion control\n unit" as MCU
 participant "Positioning\n unit" as PU
 participant "Odometer Positioning\nDriver" as OPD
-participant "Global Positioning\nDriver" as GPD
 participant "Sensors\n unit" as SU
+participant "Locker\n unit" as LU
 participant "Human-machine\n interface unit" as HMI
 actor "User" as User
 
@@ -29,20 +29,20 @@ User    -> WH:      new order
 activate FMS
 WH      -> FMS:     new delivery request
 activate AS
-FMS     -> AS:      create PIN
-AS      -[#red]> Att:     exfiltrated plain PIN\n for old architecture or\nencrypted PIN for new
+FMS     -> AS:      PIN request
+AS      -[#red]> Att:     exfiltrated PIN
 AS      -> User:    plain PIN
-AS     --> FMS:     encrypted PIN
+AS     --> FMS:     hashed PIN
 deactivate AS
 
-note over Att #red: PIN encryption broken \n => got plain PIN
+note over Att #red: PIN bruteforced \n => got plain PIN
 note over FMS #red: PIN changed to \nknown by attacker
 note over FMS #red: Address changed
 FMS      -[#red]> Att:     exfiltrated PIN
 
 
 note over FMS, CS #red: MITM: task read/change/prevent sending
-FMS     -[#red]> CS:      new task (address+sig + encrypted pin)
+FMS     -[#red]> CS:      new task (address+sig + pin hash)
 note over CS #red: details changed
 CS      -[#red]> Att:     PIN
 CS     -> CCU
@@ -52,10 +52,7 @@ activate CCU
 CCU    --> CS:      delivery started
 &CS    --> FMS:
 
-note over CCU #red: decrypt with attacker's key\n as he changed cyphertext earlier
-CCU     -[#red]> CCU:     decrypt PIN
-
-note over CCU #red: do not do validation,\n or change the certificate to attacker's
+note over CCU #red: do not do validation,\n or validate with attacker's certificate
 CCU     -[#red]> CCU:     validate address signature
 
 opt PIN decryption failed or adderess signature invalid
@@ -68,24 +65,23 @@ loop go to user until destination reached
 
 MCU     -[#red]> OPD:      invalid odometry
 OPD     -[#red]> PU:       invalid position
-GPD     -[#red]> PU:       invalid position
 note over PU #red: ignore drivers' data
+note over PU #red: use data from tampered driver
 PU      <-[#red]> CCU:     invalid current position
-note over CCU #red: targeting not\n the desired position
+note over CCU #red: going not to\n the desired position
 CCU     -[#red]> MCU:      invalid target driving\n speed & direction
 note over MCU #red: ignore sent request
 note over MCU #red: do not apply restrictions
 MCU     -[#red]> MCU:       apply restrictions
 
 note over CCU #red: try open locker not in destination
-CCU     -[#red]> SU:      open locker
+CCU     -[#red]> LU:      open locker
 end
 
 
 CCU     -> MCU:     stop motors
-note over MCU #red: do not stop
 
-SU      -[#red]> CCU:     human detected
+SU      -[#red]> CCU:     human detected when no human
 activate CCU #DDDDDD
 
 
@@ -95,10 +91,8 @@ User    -[#red]> HMI:     enter PIN
 end
 
 loop#red Bruteforce by HMI service
-HMI     -[#red]> CCU:     access PIN
+HMI     -[#red]> CCU:     PIN hash
 end
-
-HMI     -> CCU:     access PIN
 
 note over CCU #red: do not validate PIN
 CCU     -[#red]> CCU:     check PIN
@@ -110,7 +104,7 @@ CCU     -> SU:      open locker
 activate SU
 note over SU #red: do not open
 SU      -[#red]> SU:      locker open\nfor 5sec
-SU     --> CCU:     locker closed
+SU     -[#red]-> CCU:     do not notify of closed door
 deactivate SU
 
 else Maximum invalid attempts count reached
@@ -118,18 +112,17 @@ else Maximum invalid attempts count reached
 note over CCU #red: open when PIN not supplied
 CCU  -[#red]> SU: open locker
 
-CCU    --> CS:      user failed to enter PIN
+else
+
+note over CCU #red: do not inform of incident
+CCU    -[#red]-> CS:      user failed to enter PIN
 &CS    --> FMS
 
 deactivate CCU
 end
 
 loop go to warehouse until destination reached
-MCU     -> OPD:      odometry
-OPD     -> PU:       position
-GPD     -> PU:       position
-PU      <-> CCU:     current position
-CCU     -> MCU:      target driving\n speed & direction
+note over CCU: see first navigation cycle \n everything is same
 end
 
 CCU     -> MCU:     stop motors

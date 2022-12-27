@@ -43,7 +43,7 @@ There are e2e tests provided in `./e2e` project on Junit5.
 
 - Running these tests requires user to **manually** start all containers with `./start.sh`.
 - Each before rerunning tests, it is recommended to restart all with `./compose.sh down && ./start.sh`
-- Only after having containers started execute tests with `gradle test`
+- Only after having containers started execute tests with `gradle test --info`
 - Remember that tests requires kafka to be active, so initial delay of up to 1 minute is normal
 - Tests **cannot** be started with any Kafka ACLs configured,
   because they need to subscribe to any topic and publish to any topic bypassing the monitor
