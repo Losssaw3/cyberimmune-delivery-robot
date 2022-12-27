@@ -149,9 +149,10 @@ public class MainService {
      * then enable PIN code checking (and therefore locker opening)
      */
     private void onHumanDetected(MessageRequest request) {
-        if (currentStatus == DeliveryStatus.ARRIVED_TO_CUSTOMER)
+        if (currentStatus == DeliveryStatus.ARRIVED_TO_CUSTOMER) {
             setStatus(DeliveryStatus.HUMAN_DETECTED);
-        log.info("Human detected");
+            log.info("Human detected");
+        }
     }
 
 

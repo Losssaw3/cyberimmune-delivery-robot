@@ -86,9 +86,9 @@ public class FullTest {
         robotBusSuite.produceUnmonitored(req);
         log.info("Sent task with invalid signature");
 
-        serverBusSuite
+        robotBusSuite
                 .awaitMessages(
-                        DeliveryStatusRequest.class, Unit.FMS,
+                        DeliveryStatusRequest.class, Unit.COMM,
                         60, TimeUnit.SECONDS
                 )
                 .assertArrivedThat(i -> DeliveryStatus.ENDED_ERR == i.getStatus(),
@@ -253,8 +253,8 @@ public class FullTest {
                         DeliveryStatusRequest.class, Unit.COMM,
                         3, TimeUnit.MINUTES
                 )
-                .assertArrivedValidated(
-                        i -> assertEquals(DeliveryStatus.ARRIVED_TO_CUSTOMER, i.getStatus()),
+                .assertArrivedThat(
+                        i -> i.getStatus() == DeliveryStatus.ARRIVED_TO_CUSTOMER || i.getStatus() == DeliveryStatus.HUMAN_DETECTED,
                         "Robot should be able to reach destination and notify of it",
                         "Robot should be able to reach destination and notify of it"
                 );
@@ -282,18 +282,6 @@ public class FullTest {
                 );
 
         log.info("Robot arrived ok");
-        log.info("Waiting for user to show up");
-        robotBusSuite
-                .awaitMessages(
-                        DeliveryStatusRequest.class, Unit.COMM,
-                        3, TimeUnit.MINUTES
-                )
-                .assertArrivedValidated(
-                        i -> assertEquals(DeliveryStatus.HUMAN_DETECTED, i.getStatus()),
-                        "Robot should notify of user presence",
-                        "User presence wasn't established however state illegally changed"
-                );
-        log.info("User came to the robot");
 
         log.info("SCENARIO 11 PASSED");
     }
