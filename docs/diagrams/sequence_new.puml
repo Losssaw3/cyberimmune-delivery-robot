@@ -3,46 +3,44 @@
 'autonumber
 
 actor "Warehouse manager" as WH
+participant "WEB market" as STOR
 participant "Fleet management\n service" as FMS
 participant "Authentication\n service" as AS
-participant "Communication\n service" as CS
 participant "Central control\n unit" as CCU
 participant "Motion control\n unit" as MCU
 participant "Positioning\n unit" as PU
 participant "Odometer Positioning\nDriver" as OPD
-participant "Global Positioning\nDriver" as GPD
 participant "Sensors\n unit" as SU
+participant "Locker\n unit" as LU
 participant "Human-machine\n interface unit" as HMI
 actor "User" as User
 
-User    -> WH:      new order
+User    -> STOR:      new order
+
+WH      -> STOR:     new delivery request
 activate FMS
-WH      -> FMS:     new delivery request
+STOR    -> FMS
 activate AS
 FMS     -> AS:      create PIN
 AS      -> User:    plain PIN
-AS     --> FMS:     encrypted PIN
+AS     --> FMS:     hashed PIN
 deactivate AS
-FMS     -> CS:      new task (address+sig + encrypted pin)
-&CS     -> CCU
+FMS     -> CCU:      new task (address+sig + hashed pin)
 
 activate CCU
 
-CCU    --> CS:      delivery started
-&CS    --> FMS:
+CCU    --> FMS:      delivery started
 
 CCU     -> CCU:     decrypt PIN
 CCU     -> CCU:     validate address signature
 opt PIN decryption failed or adderess signature invalid
-CCU    --> CS:      unable to start task
-&CS    --> FMS
+CCU    --> FMS:      unable to start task
 end opt
 
 loop go to user until destination reached
 
 MCU     -> OPD:      odometry
 OPD     -> PU:       position
-GPD     -> PU:       position
 PU      <-> CCU:     current position
 CCU     -> MCU:      target driving\n speed & direction
 MCU     -> MCU:       apply restrictions
@@ -51,6 +49,11 @@ end
 
 
 CCU     -> MCU:     stop motors
+
+
+loop
+PU      -> SU:      current position
+end
 
 SU      -> CCU:     human detected
 activate CCU #DDDDDD
@@ -64,16 +67,16 @@ end
 
 alt Valid PIN supplied
 
-CCU     -> SU:      open locker
-activate SU
-SU      -> SU:      locker open\nfor 5sec
-SU     --> CCU:     locker closed
-deactivate SU
+CCU     -> LU:      open locker
+activate LU
+LU      -> LU:      locker open\nfor 5sec
+LU     --> CCU:     locker closed
+LU     --> CCU:     locker door closed
+deactivate LU
 
 else Maximum invalid attempts count reached
 
-CCU    --> CS:      user failed to enter PIN
-&CS    --> FMS
+CCU    --> FMS:      user failed to enter PIN
 
 deactivate CCU
 end
@@ -81,18 +84,16 @@ end
 loop go to warehouse until destination reached
 MCU     -> OPD:      odometry
 OPD     -> PU:       position
-GPD     -> PU:       position
 PU      <-> CCU:     current position
 CCU     -> MCU:      target driving\n speed & direction
 end
 
 CCU     -> MCU:     stop motors
 
-CCU     --> CS:     delivery ended
+CCU     --> FMS:     delivery ended
 
 deactivate CCU
 
-&CS     --> FMS:    delivery ended
 &FMS    --> WH:     delivery ended
 
 deactivate FMS

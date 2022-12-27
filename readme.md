@@ -7,7 +7,7 @@ All documentation is in `/docs` (sorry, but in Russian only).
 
 - Environment
     - Please use Linux.
-    - Install `Java 16` or newer
+    - Install `Java 16` (16 only, because containers have v16 and may fail with others)
     - Install `Gradle`. Tested with v7.5.1
     - Install `Docker` and `docker-compose`
     - If you want, install `tmux` and `tmuxinator` to view logs with alreadyprepared screens
@@ -18,6 +18,16 @@ All documentation is in `/docs` (sorry, but in Russian only).
 - `./start.sh` - starts all containers in docker-compose
 - `# ./compose.sh` - wrapper for docker-compose with configs set
 - `# test.http` - file with main api requests needed
+
+## Building
+
+Gradle multi-project builds are used.
+Packaging to docker is not classic. Do not try to use `docker build`.
+All services are build with single Dockerfile located in /docker.
+Firstly, build java code with gradle.
+Then use `gradle docker`, which copies global dockerfile, inserts service-specific data
+and puts application package near to dockerfile copy and then automatically builds image.
+All images get names in form `delivery_${gradleProjectName}`.
 
 ## Running
 
