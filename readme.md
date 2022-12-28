@@ -3,6 +3,8 @@
 This system is a demo project for principles demonstration of cyber-immune applications development.
 All documentation is in `/docs` (sorry, but in Russian only).
 
+[Video demonstration](https://youtu.be/_nKHuNlXcNc)
+
 ## Setup
 
 - Environment
