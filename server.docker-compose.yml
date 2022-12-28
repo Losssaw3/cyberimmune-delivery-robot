@@ -60,8 +60,12 @@ services:
     image: delivery-authentication:latest
     depends_on:
       - server_monitor
+    volumes:
+      - ./certs/secret_keystore.p12:/app/secret_keystore.p12:ro
     environment:
       KAFKA_BOOTSTRAP_SERVER: 'server_broker:29000'
+      KEYSTORE_PATH: '/app/secret_keystore.p12'
+      KEYSTORE_PASSWORD: 'kiuw2ka7ahSeeTh2wieb6ohy1Xu3haj4'
 
   server_comms:
     hostname: server-com

@@ -129,13 +129,16 @@ public class MainService {
             log.warn("Got message for unknown robot: {}. Having {}", senderIp, robots);
             return;
         }
-
         var id = robot.get().getUrl();
+
+        var status = request.getStatus();
+        log.info("Status for {} updated to {}", id, status);
+
+        if (status == DeliveryStatus.ENDED_ERR) status = DeliveryStatus.IDLE;
+
         robots
                 .get(id)
-                .setStatus(request.getStatus());
-
-        log.info("Status for {} updated to {}", id, request.getStatus());
+                .setStatus(status);
     }
 
     private String newRobot(String url) {

@@ -165,6 +165,8 @@ services:
       KAFKA_BOOTSTRAP_SERVER: 'broker:29000'
       SIGN_KS_PATH: '/app/client_sign_keystore.p12'
       SIGN_KS_PASS: 'uogh7noh4Ree8huZ9shae7vi6ohphohj'
+      AES_KS_PATH: '/app/secret_keystore.p12'
+      AES_KS_PASS: 'kiuw2ka7ahSeeTh2wieb6ohy1Xu3haj4'
 
 networks:
   robot_net:

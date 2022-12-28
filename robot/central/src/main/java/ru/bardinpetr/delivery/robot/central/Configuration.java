@@ -17,5 +17,13 @@ public class Configuration {
     public static String getSignKeystorePass() {
         return environ.getOrDefault("SIGN_KS_PASS", "");
     }
+
+    public static String getAesKeystorePath() {
+        return environ.getOrDefault("AES_KS_PATH", "certs/secret_keystore.p12");
+    }
+
+    public static String getAesKeystorePass() {
+        return environ.getOrDefault("AES_KS_PASS", "");
+    }
 }
 

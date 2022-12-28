@@ -18,5 +18,5 @@ keytool -exportcert -alias $SIGN_ALIAS -storetype PKCS12 -keystore $KEYSTORE_SER
 keytool -importcert -noprompt -alias $SIGN_ALIAS -storetype PKCS12 -keystore $KEYSTORE_CLIENT -file sign.cer -rfc -storepass $KEYSTORE_CLIENT_PASS
 rm sign.cer
 
-#keytool -genseckey -alias $PIN_ALIAS -keyalg AES -keysize 256 -keystore $KEYSTORE_SECRET -storetype PKCS12 -storepass $KEYSTORE_SECRET_PASS
+keytool -genseckey -alias $PIN_ALIAS -keyalg AES -keysize 256 -keystore $KEYSTORE_SECRET -storetype PKCS12 -storepass $KEYSTORE_SECRET_PASS
 

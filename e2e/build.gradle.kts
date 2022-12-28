@@ -14,5 +14,5 @@ dependencies {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
-    enabled = gradle.startParameter.taskNames.contains("test") || gradle.startParameter.taskNames.contains("check")
+    enabled = gradle.startParameter.taskNames.any { it.contains("test") }
 }

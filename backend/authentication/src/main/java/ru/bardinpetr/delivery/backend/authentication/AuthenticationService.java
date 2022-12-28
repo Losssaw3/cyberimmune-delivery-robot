@@ -3,6 +3,7 @@ package ru.bardinpetr.delivery.backend.authentication;
 import lombok.extern.slf4j.Slf4j;
 import ru.bardinpetr.delivery.backend.authentication.services.PinGeneratorService;
 import ru.bardinpetr.delivery.backend.authentication.services.messaging.SenderService;
+import ru.bardinpetr.delivery.common.libs.crypto.AESCryptoService;
 import ru.bardinpetr.delivery.common.libs.crypto.PINService;
 import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerFactory;
 import ru.bardinpetr.delivery.common.libs.messages.kafka.consumers.MonitoredKafkaConsumerService;
@@ -14,6 +15,7 @@ import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINR
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.CreatePINResponse;
 import ru.bardinpetr.delivery.common.libs.messages.msg.authentication.PINTestRequest;
 
+import javax.crypto.SecretKey;
 import java.util.Map;
 
 @Slf4j
@@ -24,8 +26,11 @@ public class AuthenticationService {
     private final SenderService senderService = new SenderService();
     private final MonitoredKafkaConsumerService consumerService;
     private final MonitoredKafkaProducerService producerService;
+    private final AESCryptoService cryptoService;
 
-    public AuthenticationService(Map<String, Object> kafkaConfig) {
+    public AuthenticationService(Map<String, Object> kafkaConfig, SecretKey secretKey) {
+        cryptoService = new AESCryptoService(secretKey);
+
         consumerService = new MonitoredKafkaConsumerServiceBuilder(SERVICE_NAME)
                 .setConsumerFactory(new MonitoredKafkaConsumerFactory(kafkaConfig))
                 .subscribe(CreatePINRequest.class, this::onRequest)
@@ -55,7 +60,7 @@ public class AuthenticationService {
                 new PINTestRequest(pin)
         ); // This is only for complete-system unit testing.
 
-        return PINService.hashPin(pin);
+        return cryptoService.encrypt(PINService.hashPin(pin));
     }
 
     public void start() {

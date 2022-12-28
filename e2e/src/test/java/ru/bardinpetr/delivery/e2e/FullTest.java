@@ -105,7 +105,7 @@ public class FullTest {
     @Order(1)
     void startDeliveryTest() throws ExecutionException, InterruptedException {
         log.info("[START] classic scenario");
-//        Thread.sleep(3000);
+        Thread.sleep(3000);
         log.info("Starting sending new task");
 
         flush();
@@ -315,9 +315,9 @@ public class FullTest {
                 )
                 .assertArrived("Locker must open in destination point by valid PIN");
 
-        robotBusSuite
+        serverBusSuite
                 .awaitMessages(
-                        DeliveryStatusRequest.class, Unit.COMM,
+                        DeliveryStatusRequest.class, Unit.FMS,
                         30, TimeUnit.SECONDS
                 )
                 .assertArrivedValidated(
