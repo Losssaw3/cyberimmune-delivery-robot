@@ -13,7 +13,7 @@ import lombok.Data;
  * then srv2 will reply to topic srv1_action1reply. Topics are generated with lowercase naming of message class name
  */
 
-@JsonIgnoreProperties({"targetTopic", "valid"})
+@JsonIgnoreProperties(value = {"targetTopic", "valid", "actionType"}, allowGetters = true)
 @Data
 @AllArgsConstructor
 public class MessageRequest {

@@ -14,7 +14,7 @@ public class RuleValidator implements IValidator {
 
     public RuleValidator(Map<Class<? extends MessageRequest>, ActionRules> rules) {
         this.rules = rules;
-        this.defaultMode = AllowMode.ALLOW;
+        this.defaultMode = AllowMode.DENY;
     }
 
     public RuleValidator(Map<Class<? extends MessageRequest>, ActionRules> rules,

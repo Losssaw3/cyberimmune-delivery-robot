@@ -1,5 +1,6 @@
 package ru.bardinpetr.delivery.common.libs.messages.kafka.deserializers;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,17 @@ import ru.bardinpetr.delivery.common.libs.messages.msg.MessageRequest;
 @Slf4j
 public class MonitoredDeserializer extends ErrorHandlingDeserializer<MessageRequest> {
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+//        mapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true);
+    }
+
     public MonitoredDeserializer(IDeserializerErrorHandler errorHandler) {
         super(getDeserializer());
         setFailedDeserializationFunction(error -> errorHandler.onError(error.getTopic(), error.getException()));
@@ -31,7 +43,7 @@ public class MonitoredDeserializer extends ErrorHandlingDeserializer<MessageRequ
     }
 
     private static JsonDeserializer<MessageRequest> getDeserializer() {
-        var jsonDeserializer = new JsonDeserializer<MessageRequest>();
+        var jsonDeserializer = new JsonDeserializer<MessageRequest>(mapper);
         jsonDeserializer.addTrustedPackages(MessageRequest.getClassNameFromActionType("*"));
         jsonDeserializer.ignoreTypeHeaders();
         jsonDeserializer.typeResolver(MonitoredDeserializer::resolveType);
@@ -39,7 +51,6 @@ public class MonitoredDeserializer extends ErrorHandlingDeserializer<MessageRequ
     }
 
     private static JavaType resolveType(String topic, byte[] data, Headers headers) {
-        var mapper = new ObjectMapper();
         try {
             var action = mapper.readTree(data).get("actionType");
             if (action == null) return null;

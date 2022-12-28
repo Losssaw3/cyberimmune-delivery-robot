@@ -102,15 +102,21 @@ public class Main {
                         new ActionRulesBuilder()
                                 .allow(CCU, LOC)
                                 .allow(LOC, POS_ODOM)
+                                .allow(LOC, ODOM2)
                                 .allow(POS_ODOM, MOTION)
+                                .allow(ODOM2, MOTION)
+                                .allow(SENSORS, LOC)
                                 .build()
                 )
                 .addRule(
                         PositionReply.class,
                         new ActionRulesBuilder()
                                 .allow(MOTION, POS_ODOM)
+                                .allow(MOTION, ODOM2)
                                 .allow(POS_ODOM, LOC)
+                                .allow(ODOM2, LOC)
                                 .allow(LOC, CCU)
+                                .allow(LOC, SENSORS)
                                 .build()
                 )
                 .addRule(
@@ -129,12 +135,14 @@ public class Main {
                         GetMotionDataRequest.class,
                         new ActionRulesBuilder()
                                 .allow(POS_ODOM, MOTION)
+                                .allow(ODOM2, MOTION)
                                 .build()
                 )
                 .addRule(
                         GetMotionDataReply.class,
                         new ActionRulesBuilder()
                                 .allow(MOTION, POS_ODOM)
+                                .allow(MOTION, ODOM2)
                                 .build()
                 )
                 .addRule(

@@ -8,7 +8,7 @@ import java.util.Map;
 public class ActionRulesBuilder {
 
     private final Map<RequestActors, AllowMode> actorsAllowance = new HashMap<>();
-    private AllowMode defaultMode = AllowMode.ALLOW;
+    private AllowMode defaultMode = AllowMode.DENY;
 
     public ActionRulesBuilder setDefaultMode(AllowMode mode) {
         this.defaultMode = mode;
@@ -21,7 +21,7 @@ public class ActionRulesBuilder {
     }
 
     public ActionRulesBuilder allow(Unit from, Unit to) {
-        return allow(RequestActors.of(from.name(), to.name()));
+        return allow(RequestActors.of(from.toString(), to.toString()));
     }
 
     public ActionRulesBuilder deny(RequestActors actors) {
@@ -30,7 +30,7 @@ public class ActionRulesBuilder {
     }
 
     public ActionRulesBuilder deny(Unit from, Unit to) {
-        return deny(RequestActors.of(from.name(), to.name()));
+        return deny(RequestActors.of(from.toString(), to.toString()));
     }
 
     public ActionRules build() {

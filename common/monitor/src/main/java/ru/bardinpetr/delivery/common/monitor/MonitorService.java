@@ -37,7 +37,7 @@ public class MonitorService {
 
     private MessageRequest onDeserializeError(String topic, Exception ex) {
         log.debug("[MON-ERR] invalid message on {} : {}", topic, ex);
-        log.warn("[MON-ERR] invalid message on topic {}", topic);
+        log.warn("[MON-ERR] invalid message on topic {}", topic, ex);
         return null;
     }
 
