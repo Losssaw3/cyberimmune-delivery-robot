@@ -1,0 +1,75 @@
+@startuml
+
+actor User as U
+
+usecase "VPN client\n(server side)" as VPNC0 
+usecase "VPN client\n(robot side)" as VPNC1 
+usecase "VPN server" as VPNS 
+
+actor "Warehouse\n  manager" as W
+
+
+rectangle Warehouse {
+    usecase "WEB store" as WS
+    W -left-> WS: (HTTP) delivery details
+
+    usecase "Fleet management" as FMS 
+    usecase "Authentication service" as AS 
+    usecase "Communication service" as CS_SRV 
+
+    rectangle {
+        usecase "Message Bus" as MB_SRV 
+        usecase "Monitor" as M_SRV 
+
+        M_SRV <-> MB_SRV: validation
+    }
+
+    WS -left-> FMS: (HTTP)
+
+    M_SRV <-left-> FMS: robot interaction, PIN request
+    M_SRV <-down-> CS_SRV: (HTTP)
+    M_SRV -up-> AS: PIN generation
+
+    CS_SRV --> VPNC0
+}
+
+VPNC0 --> VPNC1
+VPNC0 -> VPNS
+VPNC1 -> VPNS
+
+rectangle Robot {
+    usecase "Communication" as CS 
+    usecase "Motion control" as MCU 
+    usecase "GPD" as GPD 
+    usecase "OPD" as OPD 
+    usecase "Positioning" as PU 
+    usecase "Sensors" as SU 
+    usecase "Locker" as LU 
+    usecase "HMI" as HMI 
+    usecase "Central control" as CCU 
+
+    rectangle {
+        usecase "Message Bus" as MB 
+        usecase "Monitor" as M 
+
+        M <-> MB: validation
+    }
+
+    VPNC1 --> CS: (HTTP)
+
+    CS <---> MB
+
+    MCU <---> MB: target motion\ndirection, speed\nand limitations
+    MB <-down-> CCU: full robot control,\nbusiness logic
+    SU <-down-> MB: human detection
+    PU <-up-> MB: current position
+    LU <-up-> MB: locker control
+    HMI <-> MB : input of PIN code
+
+    OPD --> MB: odometry raw data
+    GPD -down-> MB: GPS raw data
+
+    U -> HMI: (HTTP) PIN code
+}
+
+@enduml

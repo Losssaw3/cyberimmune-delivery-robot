@@ -16,6 +16,7 @@ All documentation is in `/docs` (sorry, but in Russian only).
 - `gradle build` - builds all services
 - `gradle docker` - builds docker images
 - `./start.sh` - starts all containers in docker-compose
+- `./reload.sh` - reloads stateful containers in docker-compose
 - `# ./compose.sh` - wrapper for docker-compose with configs set
 - `# test.http` - file with main api requests needed
 
@@ -43,6 +44,8 @@ There are e2e tests provided in `./e2e` project on Junit5.
 
 - Running these tests requires user to **manually** start all containers with `./start.sh`.
 - Each before rerunning tests, it is recommended to restart all with `./compose.sh down && ./start.sh`
+    - if you know how services work, you can use `reload.sh` to reload only stateful containers
+      if others are unaffected by your previous actions
 - Only after having containers started execute tests with `gradle test --info`
 - Remember that tests requires kafka to be active, so initial delay of up to 1 minute is normal
 - Tests **cannot** be started with any Kafka ACLs configured,

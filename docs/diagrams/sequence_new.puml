@@ -23,15 +23,16 @@ STOR    -> FMS:     signed delivery task
 activate AS
 FMS     -> AS:      create PIN
 AS      -> User:    plain PIN
-AS     --> FMS:     hashed PIN
+AS     --> FMS:     encrypted PIN
 deactivate AS
-FMS     -> CCU:      new task (address+sig + hashed pin)
+FMS     -> CCU:      new task (address+sig + encrypted pin)
 
 activate CCU
 
 CCU    --> FMS:      delivery started
 
 CCU     -> CCU:     validate address signature
+CCU     -> CCU:     decrypt pin
 opt task invalid OR adderess signature invalid
 CCU    --> FMS:      unable to start task
 end opt

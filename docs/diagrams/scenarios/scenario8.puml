@@ -32,9 +32,8 @@ activate AS
 FMS     -> AS:      PIN request
 AS      -[#red]> Att:     exfiltrated PIN
 AS      -> User:    plain PIN
-AS     --> FMS:     encrypted PIN
+AS     --> FMS:     hashed PIN
 deactivate AS
-FMS    --> Att:     encrypted PIN
 
 note over Att #red: PIN bruteforced \n => got plain PIN
 note over FMS #red: PIN changed to \nknown by attacker
@@ -43,7 +42,7 @@ FMS      -[#red]> Att:     exfiltrated PIN
 
 
 note over FMS, CS #red: MITM: task read/change/prevent sending
-FMS     -[#red]> CS:      new task (address+sig + enc pin)
+FMS     -[#red]> CS:      new task (address+sig + pin hash)
 note over CS #red: details changed
 CS      -[#red]> Att:     PIN
 CS     -> CCU
@@ -54,9 +53,9 @@ CCU    --> CS:      delivery started
 &CS    --> FMS:
 
 note over CCU #red: do not do validation,\n or validate with attacker's certificate
-note over CCU #red: decrypt PIN with attacker's keys
+CCU     -[#red]> CCU:     validate address signature
 
-opt adderess signature invalid
+opt PIN decryption failed or adderess signature invalid
 note over FMS, CS #red: do not notify of errors
 CCU    --[#red]> CS:      unable to start task
 &CS    --[#red]> FMS

@@ -1,0 +1,55 @@
+@startuml
+!pragma teoz true
+
+actor "User" as User
+actor "Warehouse manager" as WH
+actor "Attacker" as Att #red
+participant "Authentication\n service" as AS
+participant "Fleet management\n service" as FMS
+participant "Central control\n unit" as CCU
+
+alt DDOS
+
+loop#red DDOS
+Att     -[#red]> FMS: new order
+end loop
+
+else task altering with normal startup
+
+User    -> WH:      new order
+activate FMS
+WH      -> FMS:     new delivery request
+activate AS
+FMS     -> AS:      PIN request
+AS      -[#red]> Att:     exfiltrated PIN
+AS      -> User:    plain PIN
+
+note over User #red: PIN stolen\n from user device \n or network
+
+AS     --> FMS:     encrypted PIN
+deactivate AS
+
+FMS -[#red]> Att: PIN cyphertext
+note over Att #red: PIN bruteforced \n => got plain PIN
+note over FMS #red: PIN changed to \nknown by attacker
+note over FMS #red: Address changed
+
+alt pin changed
+FMS -[#red]> CCU: task with other pin hash
+User -> CCU: pin
+note over CCU #red: locker won't open\n for real user
+
+else invalid task
+FMS -[#red]> CCU: task with invalid signature
+note over CCU #red: task ignored
+
+else for OLD architecture - task address or pin changed
+note over CCU #red: go to other address and\n open for attacker's pin
+
+end alt
+
+deactivate FMS
+end alt
+
+
+@enduml

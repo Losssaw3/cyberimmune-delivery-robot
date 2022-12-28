@@ -2,37 +2,53 @@
 
 actor User as U
 
-rectangle Warehouse {
-    actor "Warehouse\n  manager" as W
-    usecase "Fleet management" as FMS
+usecase "VPN client\n(server side)" as VPNC0 
+usecase "VPN client\n(robot side)" as VPNC1 
 
-    W -> FMS : (HTTP) delivery details
+actor "Warehouse\n  manager" as W
+
+
+rectangle Warehouse {
+    usecase "WEB store" as WS
+    W -> WS: (HTTP) delivery details
+
+    usecase "Fleet management" as FMS 
+    usecase "Authentication" as AS
+    usecase "Communication" as CS_SRV
+
+    WS -> FMS: (HTTP)
+
+    FMS <-down-> AS: pin generation
+    FMS <-down-> CS_SRV: robot communication
+
+    CS_SRV --> VPNC0
 }
+
+VPNC0 --> VPNC1
 
 rectangle Robot {
     usecase "Communication" as CS
-    usecase "Motion control" as MCU
-    usecase "Positioning" as PU
-    usecase "Sensors" as SU
-    usecase "HMI" as HMI
-    usecase "Central control" as CCU
+    usecase "Motion control" as MCU 
+    usecase "GPD" as GPD 
+    usecase "OPD" as OPD 
+    usecase "Positioning" as PU 
+    usecase "Sensors" as SU 
+    usecase "Locker" as LU 
+    usecase "HMI" as HMI 
+    usecase "Central control" as CCU 
 
-    rectangle {
-        usecase "Message Bus" as MB
-        usecase "Monitor" as M
+    VPNC1 -> CS: (HTTP)
 
-        M <-> MB: validation
-    }
+    CCU <-left-> CS: server communication
+    CCU <--> MCU: target motion\ndirection, speed\nand limitations
 
-    FMS --> CS: (HTTP)\ndelivery details,\nPIN code,\nstatus messages
+    SU -up-> CCU: human detection
+    CCU -down-> LU: locker control
+    HMI -left->  CCU: PIN code hash
 
-    CS <---> MB
-
-    MB <-down-> CCU: full robot control,\nbusiness logic
-    MCU <---> MB: target motion\ndirection, speed\nand limitations
-    PU <---> MB: current position
-    SU <---> MB: human detection,\nlocker control
-    HMI <-> MB : input of PIN code
+    PU -down-> CCU: current position
+    GPD -down-> PU: GPS raw data
+    OPD -down-> PU: odometry raw data
 
     U -> HMI: (HTTP) PIN code
 }
