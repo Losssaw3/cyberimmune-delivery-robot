@@ -2,142 +2,31 @@
 !pragma teoz true
 'autonumber
 
-actor "Warehouse manager" as WH
 actor "Attacker" as Att #red
-participant "Authentication\n service" as AS
-participant "Fleet management\n service" as FMS
-participant "Communication\n service (x2)" as CS
 participant "Central control\n unit" as CCU
-participant "Motion control\n unit" as MCU
-participant "Positioning\n unit" as PU
-participant "Odometer Positioning\nDriver" as OPD
 participant "Sensors\n unit" as SU
 participant "Locker\n unit" as LU
 participant "Human-machine\n interface unit" as HMI
 actor "User" as User
 
-loop#red DDOS
-Att     -[#red]> FMS
-end loop
+alt control of locker
 
+Att -[#red]> LU: open
 activate LU
-note over LU #red: open without request
+
 LU -[#red]> LU: open
+note over LU #red: opened => contents stolen
+
 deactivate LU
 
-User    -> WH:      new order
-activate FMS
-WH      -> FMS:     new delivery request
-activate AS
-FMS     -> AS:      PIN request
-AS      -[#red]> Att:     exfiltrated PIN
-AS      -> User:    plain PIN
-AS     --> FMS:     hashed PIN
-deactivate AS
+else no notification of human
+note over CCU: arrived at destination
+User -> HMI: enter pin
+&HMI -> CCU: pin
+note over SU #red: no user arrived notification
+note over CCU #red: pin attempt ignored as no user present
 
-note over Att #red: PIN bruteforced \n => got plain PIN
-note over FMS #red: PIN changed to \nknown by attacker
-note over FMS #red: Address changed
-FMS      -[#red]> Att:     exfiltrated PIN
-
-
-note over FMS, CS #red: MITM: task read/change/prevent sending
-FMS     -[#red]> CS:      new task (address+sig + pin hash)
-note over CS #red: details changed
-CS      -[#red]> Att:     PIN
-CS     -> CCU
-
-activate CCU
-
-CCU    --> CS:      delivery started
-&CS    --> FMS:
-
-note over CCU #red: do not do validation,\n or validate with attacker's certificate
-CCU     -[#red]> CCU:     validate address signature
-
-opt PIN decryption failed or adderess signature invalid
-note over FMS, CS #red: do not notify of errors
-CCU    --[#red]> CS:      unable to start task
-&CS    --[#red]> FMS
-end opt
-
-loop go to user until destination reached
-
-MCU     -[#red]> OPD:      invalid odometry
-OPD     -[#red]> PU:       invalid position
-note over PU #red: ignore drivers' data
-note over PU #red: use data from tampered driver
-PU      <-[#red]> CCU:     invalid current position
-note over CCU #red: going not to\n the desired position
-CCU     -[#red]> MCU:      invalid target driving\n speed & direction
-note over MCU #red: ignore sent request
-note over MCU #red: do not apply restrictions
-MCU     -[#red]> MCU:       apply restrictions
-
-note over CCU #red: try open locker not in destination
-CCU     -[#red]> LU:      open locker
 end
-
-
-CCU     -> MCU:     stop motors
-
-SU      -[#red]> CCU:     human detected when no human
-activate CCU #DDDDDD
-
-
-loop until code valid or attempts count ended
-loop#red Enter invalid PIN multiple times
-User    -[#red]> HMI:     enter PIN
-end
-
-loop#red Bruteforce by HMI service
-HMI     -[#red]> CCU:     PIN hash
-end
-
-note over CCU #red: do not validate PIN
-CCU     -[#red]> CCU:     check PIN
-end
-
-alt Valid PIN supplied
-
-CCU     -> SU:      open locker
-activate SU
-note over SU #red: do not open
-SU      -[#red]> SU:      locker open\nfor 5sec
-SU     -[#red]-> CCU:     do not notify of closed door
-deactivate SU
-
-else Maximum invalid attempts count reached
-
-note over CCU #red: open when PIN not supplied
-CCU  -[#red]> SU: open locker
-
-else
-
-note over CCU #red: do not inform of incident
-CCU    -[#red]-> CS:      user failed to enter PIN
-&CS    --> FMS
-
-deactivate CCU
-end
-
-loop go to warehouse until destination reached
-note over CCU: see first navigation cycle \n everything is same
-end
-
-CCU     -> MCU:     stop motors
-
-
-note over FMS, CS #red: do not notify of ending
-
-CCU     --[#red]> CS:     delivery ended
-
-deactivate CCU
-
-&CS     --[#red]> FMS:    delivery ended
-FMS    --> WH:     delivery ended
-
-deactivate FMS
 
 
 @enduml
