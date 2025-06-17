@@ -39,6 +39,48 @@ gradle docker
 ./start.sh
 tmuxinator start
 ```
+When system is up, go to test.http file and create new robot-instance by sending request below comment (# Register robot by URL in FMS).
+
+```shell
+HTTP/1.1 200 OK
+Date: Thu, 12 Jun 2025 14:35:37 GMT
+Connection: close
+Content-Type: text/plain
+Content-Length: 0
+```
+The output will look similar to the example above.
+
+Then send task to robot by sending request below (# Create new task and automatically assign to first available robot)
+```shell
+HTTP/1.1 200 OK
+Date: Thu, 12 Jun 2025 14:35:37 GMT
+Connection: close
+Content-Type: text/plain
+Content-Length: 0
+```
+The output will look similar to the example above.
+
+After execute pin.sh 
+```shell
+server_auth-1  | 14:28:33.579 [WARN ] backend.authentication.services.messaging.SenderService - sending PIN code to user: 758373
+```
+Then you need to copy 6-digit PIN and 
+paste it to the next request
+
+```shell
+GET http://0.0.0.0:9041/pin?code=PASTEYOURPINHERE
+```
+
+If you did everything correctly output will look similar to the example below.
+
+```shell
+HTTP/1.1 200 OK
+Date: Thu, 12 Jun 2025 14:40:19 GMT
+Content-length: 2
+
+OK
+```
+This is expected behavior
 
 ## Testing
 
@@ -119,3 +161,8 @@ There are e2e tests provided in `./e2e` project on Junit5.
     - internal:
         - zookeeper:2181
         - broker:29000
+
+### Troubleshooting
+- if pin.sh does not executing (permission denied). Try _chmod 777 pin.sh_ or other ways to grand right to execute
+- if you have issues with e2e tests (especially at PIN validation) try enter PIN manually by executing pin.sh and finish mission then start tests again
+

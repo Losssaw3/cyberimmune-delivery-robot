@@ -1,4 +1,4 @@
-version: '3.8'
+
 services:
   server_zookeeper:
     networks:
@@ -11,7 +11,7 @@ services:
   server_broker:
     networks:
       - server_net
-    image: 'bitnami/kafka:latest'
+    image: 'bitnami/kafka:3.4'
     ports:
       - '9030:9030'
     hostname: broker

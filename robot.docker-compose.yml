@@ -1,4 +1,4 @@
-version: '3.9'
+
 services:
   robot_zookeeper:
     networks:
@@ -11,7 +11,7 @@ services:
   robot_broker:
     networks:
       - robot_net
-    image: 'bitnami/kafka:latest'
+    image: 'bitnami/kafka:3.4'
     ports:
       - '9031:9031'
     hostname: broker
